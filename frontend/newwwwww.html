@@ -1,0 +1,774 @@
+<!DOCTYPE html><html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GuideMe AI - Expert Consultation Platform</title><style>
+* { margin:0; padding:0; box-sizing:border-box; font-family:Arial, Helvetica, sans-serif; }
+body { background:#f4f6f9; }
+
+.navbar {
+    background:#1e3a8a;
+    color:white;
+    padding:15px 30px;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+}
+
+.logo { font-size:22px; font-weight:bold; }
+
+.nav-links a {
+    color:white;
+    margin-left:20px;
+    text-decoration:none;
+    font-weight:bold;
+}
+
+.hero {
+    text-align:center;
+    padding:60px 20px;
+    background:linear-gradient(to right,#2563eb,#4f46e5);
+    color:white;
+}
+
+.hero button {
+    padding:12px 25px;
+    background:white;
+    color:#1e3a8a;
+    border:none;
+    border-radius:8px;
+    cursor:pointer;
+    font-weight:bold;
+}
+
+.categories {
+    padding:40px 20px;
+    text-align:center;
+}
+
+.category-container {
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
+    gap:20px;
+    max-width:1100px;
+    margin:auto;
+}
+
+.card {
+    background:white;
+    padding:25px;
+    border-radius:12px;
+    box-shadow:0 4px 10px rgba(0,0,0,0.1);
+    cursor:pointer;
+}
+
+.ask-section {
+    background:white;
+    padding:40px 20px;
+    text-align:center;
+}
+
+textarea {
+    width:80%;
+    height:120px;
+    padding:15px;
+    border-radius:10px;
+    border:1px solid #ccc;
+}
+
+.experts {
+    padding:40px 20px;
+    text-align:center;
+}
+
+.expert-container {
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
+    gap:20px;
+    max-width:1100px;
+    margin:auto;
+}
+
+.expert-card {
+    background:white;
+    padding:20px;
+    border-radius:12px;
+    box-shadow:0 4px 10px rgba(0,0,0,0.1);
+}
+
+.expert-card img {
+    width:80px;
+    height:80px;
+    border-radius:50%;
+    margin-bottom:10px;
+}
+
+.expert-card button {
+    margin-top:10px;
+    padding:8px 18px;
+    background:#1e3a8a;
+    color:white;
+    border:none;
+    border-radius:6px;
+    cursor:pointer;
+}
+
+.delete-btn {
+    background:red !important;
+}
+
+footer {
+    background:#1e3a8a;
+    color:white;
+    text-align:center;
+    padding:15px;
+    margin-top:30px;
+}
+
+/* BOOKING MODAL */
+
+.modal {
+    display:none;
+    position:fixed;
+    top:0;
+    left:0;
+    width:100%;
+    height:100%;
+    background:rgba(0,0,0,0.6);
+    justify-content:center;
+    align-items:center;
+    z-index:999;
+}
+
+.modal-content {
+    background:white;
+    padding:25px;
+    border-radius:12px;
+    width:90%;
+    max-width:500px;
+}
+
+.modal-content input,
+.modal-content textarea,
+.modal-content select {
+    width:100%;
+    padding:10px;
+    margin-bottom:10px;
+    border-radius:8px;
+    border:1px solid #ccc;
+}
+
+.close-btn {
+    background:red;
+    color:white;
+    border:none;
+    padding:6px 12px;
+    border-radius:6px;
+    cursor:pointer;
+}
+
+</style></head><body><div class="navbar">
+<div class="logo">GuideMe AI</div>
+<div class="nav-links">
+<a href="#">Home</a>
+<a href="#categories">Categories</a>
+<a href="#experts">Experts</a>
+</div>
+</div><div class="hero">
+<h1>Get Advice From Real Experts</h1>
+<p>Haircut, Career, Life, Fitness, Education and more</p>
+<button onclick="scrollToAsk()">Ask Your Question</button>
+</div><div class="categories" id="categories">
+<h2>Popular Categories</h2><div class="category-container"><div class="card" onclick="selectCategory('Haircut')">
+<h3>💇 Haircut</h3>
+<p>Get hairstyle advice</p>
+</div><div class="card" onclick="selectCategory('Career')">
+<h3>🎓 Career</h3>
+<p>Career guidance</p>
+</div><div class="card" onclick="selectCategory('Health')">
+<h3>🏥 Health</h3>
+<p>Health consultation</p>
+</div><div class="card" onclick="selectCategory('Fitness')">
+<h3>💪 Fitness</h3>
+<p>Workout plans</p>
+</div></div>
+</div><div class="ask-section" id="ask"><h2>Ask Your Question</h2><textarea
+id="question"
+placeholder="Type your question here..."
+></textarea><br><br>
+
+<button onclick="submitQuestion()">
+Get AI Advice
+</button><p
+id="selectedCategory"
+style="margin-top:10px;color:#2563eb;"
+></p></div><div class="experts" id="experts"><h2>Available Experts</h2><div
+class="expert-container"
+id="expertContainer"
+></div></div><footer>
+<p>©️ 2026 GuideMe AI</p>
+</footer><script>
+
+let category = "";
+
+function selectCategory(cat) {
+    category = cat;
+
+    document.getElementById(
+        "selectedCategory"
+    ).innerText =
+        "Selected Category: " + cat;
+
+    document
+        .getElementById("ask")
+        .scrollIntoView();
+}
+
+function scrollToAsk() {
+    document
+        .getElementById("ask")
+        .scrollIntoView();
+}
+
+/* UPDATED BOOKING FUNCTION */
+
+function bookExpert(name, email) {
+
+    document.getElementById("bookingExpertName").innerText = name;
+
+    document.getElementById("bookingExpertEmail").innerText = email;
+
+    document.getElementById(
+        "bookingModal"
+    ).style.display = "flex";
+
+}
+
+function closeBookingModal() {
+
+    document.getElementById(
+        "bookingModal"
+    ).style.display = "none";
+
+}
+
+
+
+async function submitBooking() {
+
+    let expertName =
+        document.getElementById(
+            "bookingExpertName"
+        ).innerText;
+
+    let userName =
+        document.getElementById(
+            "userName"
+        ).value;
+
+    let contact =
+        document.getElementById(
+            "userContact"
+        ).value;
+
+    let problem =
+        document.getElementById(
+            "userProblem"
+        ).value;
+
+    let method =
+        document.getElementById(
+            "communicationMethod"
+        ).value;
+
+    let urgency =
+        document.getElementById(
+            "urgencyLevel"
+        ).value;
+
+    const booking = {
+        expertName,
+        userName,
+        contact,
+        problem,
+        method,
+        urgency
+    };
+
+    try {
+
+        const response =
+            await fetch(
+                "http://localhost:8000/api/bookings",
+                {
+                    method: "POST",
+                    headers: {
+                        "Content-Type":
+                        "application/json"
+                    },
+                    body:
+                    JSON.stringify(
+                        booking
+                    )
+                }
+            );
+
+        await response.json();
+
+        alert(
+            "Booking Saved Successfully"
+        );
+
+        closeBookingModal();
+
+    } catch (error) {
+
+        console.log(error);
+
+        alert(
+            "Error saving booking"
+        );
+
+    }
+
+}
+
+
+
+
+
+/* AI SMART MATCHING FEATURE */
+
+async function submitQuestion() {
+
+    let question =
+        document.getElementById("question")
+        .value
+        .toLowerCase();
+
+    if (question === "") {
+        alert("Please enter your question");
+        return;
+    }
+
+    const response =
+        await fetch(
+            "http://localhost:8000/api/experts"
+        );
+
+    let experts =
+        await response.json();
+
+    let container =
+        document.getElementById(
+            "expertContainer"
+        );
+
+    container.innerHTML = "";
+
+    let matchedExperts =
+        experts.filter(expert => {
+
+            let profession =
+                expert.profession
+                .toLowerCase();
+
+            if (
+                question.includes("hair") ||
+                question.includes("cut")
+            ) {
+                return profession.includes("hair");
+            }
+
+            if (
+                question.includes("job") ||
+                question.includes("career")
+            ) {
+                return profession.includes("career");
+            }
+
+            if (
+                question.includes("gym") ||
+                question.includes("fitness") ||
+                question.includes("workout")
+            ) {
+                return profession.includes("fitness");
+            }
+
+            if (
+                question.includes("health") ||
+                question.includes("doctor") ||
+                question.includes("fever")
+            ) {
+                return profession.includes("doctor");
+            }
+
+            if (
+                question.includes("study") ||
+                question.includes("exam")
+            ) {
+                return profession.includes("teacher");
+            }
+
+            return true;
+
+        });
+
+    if (matchedExperts.length === 0) {
+
+        container.innerHTML = `
+            <p style="color:red; font-size:18px;">
+                No matching experts found
+            </p>
+        `;
+
+    } else {
+
+        matchedExperts.forEach(
+            (expert, index) =>
+            displayExpert(
+                expert,
+                index
+            )
+        );
+
+    }
+
+    alert("Showing relevant experts based on your question");
+
+    document.getElementById("question").value = "";
+
+}
+
+
+
+function displayExpert(expert, index) {
+
+    let container =
+        document.getElementById(
+            "expertContainer"
+        );
+
+    let card =
+        document.createElement("div");
+
+    card.className =
+        "expert-card";
+
+    card.innerHTML = `
+
+        <img src="https://via.placeholder.com/80">
+
+        <h3>${expert.name}</h3>
+
+        <p>${expert.profession}</p>
+
+        <p>${expert.experience} years experience</p>
+
+        <p>📞 ${expert.phone}</p>
+
+        <p>✉️ ${expert.email}</p>
+
+        <p>🌍 Languages: ${expert.languages}</p>
+
+        <button onclick="bookExpert('${expert.name}','${expert.email}')">
+        Book
+        </button>
+
+        <br>
+
+        <button
+        class="delete-btn"
+        onclick="deleteExpert(${index})"
+        >
+        Delete
+        </button>
+
+    `;
+
+    container.appendChild(card);
+}
+
+ 
+async function registerExpert() {
+
+    let name =
+        document.getElementById(
+            "expertName"
+        ).value;
+
+    let profession =
+        document.getElementById(
+            "profession"
+        ).value;
+
+    let experience =
+        document.getElementById(
+            "experience"
+        ).value;
+
+    let phone =
+        document.getElementById(
+            "phone"
+        ).value;
+
+    let email =
+        document.getElementById(
+            "email"
+        ).value;
+
+    let languages =
+        document.getElementById(
+            "languages"
+        ).value;
+
+    if (
+        !name ||
+        !profession ||
+        !experience ||
+        !phone ||
+        !email ||
+        !languages 
+        
+    ) 
+    {
+        alert(
+            "Please fill all fields"
+        );
+        return;
+    }
+
+    const expert = {
+        name,
+        profession,
+        experience,
+        phone,
+        email,
+        languages
+    };
+
+    try {
+
+        const response =
+            await fetch(
+                "http://localhost:8000/api/experts",
+                {
+                    method: "POST",
+                    headers: {
+                        "Content-Type":
+                        "application/json"
+                    },
+                    body:
+                    JSON.stringify(
+                        expert
+                    )
+                }
+            );
+
+        await response.json();
+
+        alert(
+            "Expert Registered"
+        );
+
+        loadExperts();
+
+    } catch (error) {
+
+        console.log(error);
+
+        alert(
+            "Error saving expert"
+        );
+
+    }
+
+}
+
+
+
+
+
+
+
+function deleteExpert(index) {
+
+    let experts =
+        JSON.parse(
+            localStorage.getItem(
+                "experts"
+            )
+        ) || [];
+
+    experts.splice(
+        index,
+        1
+    );
+
+    localStorage.setItem(
+        "experts",
+        JSON.stringify(
+            experts
+        )
+    );
+
+    document.getElementById(
+        "expertContainer"
+    ).innerHTML = "";
+
+    experts.forEach(
+        (expert, index) =>
+        displayExpert(
+            expert,
+            index
+        )
+    );
+
+    alert(
+        "Expert deleted successfully"
+    );
+
+}
+
+async function loadExperts() {
+
+    try {
+
+        const response =
+            await fetch(
+                "http://localhost:8000/api/experts"
+            );
+
+        const experts =
+            await response.json();
+
+        console.log(experts);
+
+        const container =
+            document.getElementById(
+                "expertContainer"
+            );
+
+        container.innerHTML = "";
+
+        experts.forEach((expert, index) => {
+
+            displayExpert(
+                expert,
+                index
+            );
+
+        });
+
+    } catch (error) {
+
+        console.log(
+            "Error:",
+            error
+        );
+
+    }
+
+}
+
+
+
+window.onload = async function () {
+
+    await loadExperts();
+
+};
+
+
+
+</script><div
+id="expertRegistration"
+style="padding:40px;background:#f4f6f9;"
+><h2
+style="text-align:center;color:#1e3a8a;margin-bottom:20px;"
+>Expert Registration
+
+</h2><div
+style="max-width:600px;margin:auto;background:white;padding:25px;border-radius:12px;box-shadow:0 4px 10px rgba(0,0,0,0.1);"
+><input type="text" id="expertName" placeholder="Full Name" style="width:100%; padding:10px; margin-bottom:10px;"
+
+> 
+
+<input type="text" id="profession" placeholder="Profession" style="width:100%; padding:10px; margin-bottom:10px;"
+
+> 
+
+<input type="number" id="experience" placeholder="Years of Experience" style="width:100%; padding:10px; margin-bottom:10px;"
+
+> 
+
+<input type="tel" id="phone" placeholder="Phone Number" style="width:100%; padding:10px; margin-bottom:10px;"
+
+> 
+
+<input type="email" id="email" placeholder="Email ID" style="width:100%; padding:10px; margin-bottom:10px;"
+
+> 
+<input
+type="text"
+id="languages"
+placeholder="Languages Known (Ex: English, Hindi)"
+style="width:100%; padding:10px; margin-bottom:10px;"
+>
+
+<button onclick="registerExpert()" style="padding:12px 25px;background:#2563eb;color:white;border:none;border-radius:8px;cursor:pointer;width:100%;"
+
+> 
+
+Register as Expert
+
+</button></div></div><!-- BOOKING MODAL HTML --><div id="bookingModal" class="modal"><div class="modal-content"><h2>
+Book Expert:
+<span id="bookingExpertName"></span>
+<br>
+<small id="bookingExpertEmail" style="display:none;"></small>
+</h2><input type="text" id="userName" placeholder="Your Name"
+
+> 
+
+<input type="text" id="userContact" placeholder="Phone or Email"
+
+> 
+
+<textarea
+id="userProblem"
+placeholder="Describe your problem"
+></textarea><select id="communicationMethod"><option value="">
+Select Communication Method
+</option><option>
+Chat
+</option><option>
+Call
+</option><option>
+Video Call
+</option></select><select id="urgencyLevel"><option value="">
+Select Urgency Level
+</option><option>
+Low
+</option><option>
+Medium
+</option><option>
+High
+</option></select><button onclick="submitBooking()">
+Submit Booking
+</button><br><br>
+
+<button class="close-btn" onclick="closeBookingModal()"
+
+> 
+
+Close </button>
+
+</div></div><!-- EMAILJS SCRIPT --><script src="https://cdn.jsdelivr.net/npm/emailjs-com@3/dist/email.min.js"></script><script>
+(function(){
+    if (typeof emailjs !== "undefined") {
+        emailjs.init("YOUR_PUBLIC_KEY");
+    }
+})();
+</script></body>
+</html>
