@@ -474,9 +474,25 @@ function displayExpert(expert, index) {
 
         <p>🌍 Languages: ${expert.languages}</p>
 
+        // new change
+
+        <p>⭐ Rating: ${expert.rating ? expert.rating.toFixed(1) : "No rating yet"}</p>
+
+
+
+
+
         <button onclick="bookExpert('${expert.name}','${expert.email}')">
         Book
         </button>
+
+        //new change
+
+         <button onclick="openReviewModal('${expert._id}')">
+        Give Review
+         </button>
+
+
 
         <br>
 
@@ -674,6 +690,107 @@ async function loadExperts() {
 
 }
 
+//new change
+function openReviewModal(expertId) {
+
+    document.getElementById(
+        "reviewExpertId"
+    ).value = expertId;
+
+    document.getElementById(
+        "reviewModal"
+    ).style.display = "flex";
+
+}
+
+function closeReviewModal() {
+
+    document.getElementById(
+        "reviewModal"
+    ).style.display = "none";
+
+}
+
+async function submitReview() {
+
+    const expertId =
+        document.getElementById(
+            "reviewExpertId"
+        ).value;
+
+    const userName =
+        document.getElementById(
+            "reviewUserName"
+        ).value;
+
+    const stars =
+        document.getElementById(
+            "reviewStars"
+        ).value;
+
+    const comment =
+        document.getElementById(
+            "reviewComment"
+        ).value;
+
+    if (
+        !userName ||
+        !stars ||
+        !comment
+    ) {
+
+        alert(
+            "Please fill all review fields"
+        );
+
+        return;
+
+    }
+
+    await fetch(
+
+        `http://localhost:8000/api/experts/${expertId}/review`,
+
+        {
+            method: "POST",
+
+            headers: {
+                "Content-Type":
+                "application/json"
+            },
+
+            body: JSON.stringify({
+
+                userName,
+
+                stars: Number(stars),
+
+                comment
+
+            })
+
+        }
+
+    );
+
+    alert(
+        "Review submitted successfully"
+    );
+
+    closeReviewModal();
+
+    loadExperts();
+
+}
+
+
+
+
+
+
+
+
+
 
 
 window.onload = async function () {
@@ -767,7 +884,74 @@ Submit Booking
 
 Close </button>
 
-</div></div><!-- EMAILJS SCRIPT --><script src="https://cdn.jsdelivr.net/npm/emailjs-com@3/dist/email.min.js"></script><script>
+</div></div><!-- EMAILJS SCRIPT -->
+
+
+<div id="reviewModal" class="modal">
+  <div class="modal-content">
+
+    <h2>Give Review</h2>
+
+    <input
+    type="hidden"
+    id="reviewExpertId">
+
+    <input
+    type="text"
+    id="reviewUserName"
+    placeholder="Your Name">
+
+    <select id="reviewStars">
+
+      <option value="">
+      Select Rating
+      </option>
+
+      <option value="1">
+      ⭐ 1
+      </option>
+
+      <option value="2">
+      ⭐⭐ 2
+      </option>
+
+      <option value="3">
+      ⭐⭐⭐ 3
+      </option>
+
+      <option value="4">
+      ⭐⭐⭐⭐ 4
+      </option>
+
+      <option value="5">
+      ⭐⭐⭐⭐⭐ 5
+      </option>
+
+    </select>
+
+    <textarea
+    id="reviewComment"
+    placeholder="Write your review">
+    </textarea>
+
+    <button onclick="submitReview()">
+    Submit Review
+    </button>
+
+    <br><br>
+
+    <button
+    class="close-btn"
+    onclick="closeReviewModal()">
+    Close
+    </button>
+
+  </div>
+</div>
+
+
+
+<script src="https://cdn.jsdelivr.net/npm/emailjs-com@3/dist/email.min.js"></script><script>
 (function(){
     if (typeof emailjs !== "undefined") {
         emailjs.init("YOUR_PUBLIC_KEY");
