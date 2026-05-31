@@ -302,7 +302,7 @@ async function submitBooking() {
 
         const response =
             await fetch(
-                "http://localhost:8000/api/bookings",
+                "http://127.0.0.1:8000/api/bookings/",
                 {
                     method: "POST",
                     headers: {
@@ -356,7 +356,7 @@ async function submitQuestion() {
 
     const response =
         await fetch(
-            "http://localhost:8000/api/experts"
+            "http://127.0.0.1:8000/api/experts/"
         );
 
     let experts =
@@ -474,7 +474,7 @@ function displayExpert(expert, index) {
 
         <p>🌍 Languages: ${expert.languages}</p>
 
-        // new change
+      
 
         <p>⭐ Rating: ${expert.rating ? expert.rating.toFixed(1) : "No rating yet"}</p>
 
@@ -486,7 +486,7 @@ function displayExpert(expert, index) {
         Book
         </button>
 
-        //new change
+        
 
          <button onclick="openReviewModal('${expert._id}')">
         Give Review
@@ -570,7 +570,7 @@ async function registerExpert() {
 
         const response =
             await fetch(
-                "http://localhost:8000/api/experts",
+                "http://127.0.0.1:8000/api/experts/",
                 {
                     method: "POST",
                     headers: {
@@ -655,7 +655,7 @@ async function loadExperts() {
 
         const response =
             await fetch(
-                "http://localhost:8000/api/experts"
+                "http://127.0.0.1:8000/api/experts/"
             );
 
         const experts =
@@ -690,7 +690,7 @@ async function loadExperts() {
 
 }
 
-//new change
+
 function openReviewModal(expertId) {
 
     document.getElementById(
@@ -749,7 +749,7 @@ async function submitReview() {
 
     await fetch(
 
-        `http://localhost:8000/api/experts/${expertId}/review`,
+        `http://127.0.0.1:8000/api/experts//${expertId}/review`,
 
         {
             method: "POST",
