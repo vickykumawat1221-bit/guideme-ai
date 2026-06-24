@@ -1,7 +1,6 @@
 # 🤖 GuideMeAI
 
-**GuideMeAI** is an AI-Powered Expert Consultation Guidance System that helps users find the most suitable experts based on their queries.
-The platform uses AI techniques to analyze user requirements and provide personalized expert recommendations.
+**GuideMeAI** is an AI-powered expert consultation and guidance platform that helps users receive personalized advice across multiple domains. The system provides intelligent recommendations using modern AI techniques and offers a simple, user-friendly interface.
 
 ## 📌 Features
 
