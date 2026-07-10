@@ -135,37 +135,105 @@ footer {
     left:0;
     width:100%;
     height:100%;
-    background:rgba(0,0,0,0.6);
+    background:rgba(15,23,42,0.65);
     justify-content:center;
     align-items:center;
     z-index:999;
+    padding:16px;
 }
 
 .modal-content {
     background:white;
-    padding:25px;
-    border-radius:12px;
-    width:90%;
+    padding:24px;
+    border-radius:16px;
+    width:100%;
     max-width:500px;
+    box-shadow:0 20px 45px rgba(15,23,42,0.18);
+    border:1px solid #e5e7eb;
+}
+
+.modal-content h2 {
+    font-size:1.35rem;
+    font-weight:700;
+    color:#111827;
+    margin:0 0 4px;
+}
+
+.modal-content small {
+    color:#6b7280;
+    display:block;
+    margin-bottom:14px;
+}
+
+.form-fields {
+    display:grid;
+    gap:12px;
 }
 
 .modal-content input,
 .modal-content textarea,
 .modal-content select {
     width:100%;
-    padding:10px;
-    margin-bottom:10px;
-    border-radius:8px;
-    border:1px solid #ccc;
+    min-height:46px;
+    height:46px;
+    padding:12px 14px;
+    border-radius:10px;
+    border:1px solid #d1d5db;
+    font-size:0.95rem;
+    color:#111827;
+    background:#fff;
+    box-shadow:inset 0 1px 2px rgba(0,0,0,0.04);
+    transition:border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.modal-content textarea {
+    min-height:110px;
+    height:auto;
+    resize:vertical;
+}
+
+.modal-content input:focus,
+.modal-content textarea:focus,
+.modal-content select:focus {
+    outline:none;
+    border-color:#2563eb;
+    box-shadow:0 0 0 3px rgba(37,99,235,0.15);
+}
+
+.modal-actions {
+    display:grid;
+    gap:10px;
+    margin-top:16px;
+}
+
+.submit-btn,
+.close-btn {
+    width:100%;
+    border:none;
+    border-radius:10px;
+    padding:12px 16px;
+    font-size:0.98rem;
+    font-weight:600;
+    cursor:pointer;
+    transition:transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.submit-btn:hover,
+.close-btn:hover {
+    transform:translateY(-1px);
+}
+
+.submit-btn {
+    background:linear-gradient(135deg, #2563eb, #4f46e5);
+    color:white;
+    box-shadow:0 10px 20px rgba(37,99,235,0.2);
 }
 
 .close-btn {
-    background:red;
-    color:white;
-    border:none;
-    padding:6px 12px;
-    border-radius:6px;
-    cursor:pointer;
+    background:#f3f4f6;
+    color:#374151;
+    border:1px solid #d1d5db;
+    box-shadow:0 6px 14px rgba(15,23,42,0.06);
 }
 
 </style></head><body><div class="navbar">
@@ -845,9 +913,7 @@ Register as Expert
 </button></div></div><!-- BOOKING MODAL HTML --><div id="bookingModal" class="modal"><div class="modal-content"><h2>
 Book Expert:
 <span id="bookingExpertName"></span>
-<br>
-<small id="bookingExpertEmail" style="display:none;"></small>
-</h2><input type="text" id="userName" placeholder="Your Name"
+</h2><small id="bookingExpertEmail" style="display:none;"></small><div class="form-fields"><input type="text" id="userName" placeholder="Your Name"
 
 > 
 
@@ -874,15 +940,15 @@ Low
 Medium
 </option><option>
 High
-</option></select><button onclick="submitBooking()">
+</option></select></div><div class="modal-actions"><button class="submit-btn" onclick="submitBooking()">
 Submit Booking
-</button><br><br>
+</button>
 
 <button class="close-btn" onclick="closeBookingModal()"
 
 > 
 
-Close </button>
+Close </button></div>
 
 </div></div><!-- EMAILJS SCRIPT -->
 
