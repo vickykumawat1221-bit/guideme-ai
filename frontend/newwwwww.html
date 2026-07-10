@@ -279,6 +279,71 @@ id="expertContainer"
 </footer><script>
 
 let category = "";
+let expertImages = {};
+
+// Load images from localStorage on page load
+function loadStoredImages() {
+    const stored = localStorage.getItem('expertImages');
+    if (stored) {
+        expertImages = JSON.parse(stored);
+    }
+}
+
+function uploadExpertImage(input, expertName) {
+    if (!input.files || !input.files[0]) return;
+    
+    const reader = new FileReader();
+    reader.onload = function(e) {
+        expertImages[expertName] = e.target.result;
+        localStorage.setItem('expertImages', JSON.stringify(expertImages));
+        alert(`${expertName}'s photo uploaded successfully!`);
+        
+        // Refresh experts display
+        const container = document.getElementById('expertContainer');
+        if (container.children.length > 0) {
+            loadExperts();
+        }
+    };
+    reader.readAsDataURL(input.files[0]);
+}
+
+function getExpertImage(expertName) {
+    if (expertImages[expertName]) {
+        return expertImages[expertName];
+    }
+    return `placeholder-${expertName}`;
+}
+
+function createAvatarElement(expertName) {
+    const avatarStyles = {
+        'Vikash': {gradient: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)', letter: 'V'},
+        'Vidhi': {gradient: 'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)', letter: 'V'},
+        'Varun': {gradient: 'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)', letter: 'V'},
+        'Yashaswi': {gradient: 'linear-gradient(135deg, #fa709a 0%, #fee140 100%)', letter: 'Y'}
+    };
+    
+    const avatarDiv = document.createElement('div');
+    
+    // Check if we have a real photo stored
+    const hasRealPhoto = expertImages && expertImages[expertName];
+    
+    if (hasRealPhoto && typeof expertImages[expertName] === 'string' && expertImages[expertName].startsWith('data:')) {
+        // Use real photo
+        const img = document.createElement('img');
+        img.src = expertImages[expertName];
+        img.style.cssText = 'width:80px;height:80px;border-radius:50%;object-fit:cover;margin-bottom:10px;';
+        avatarDiv.appendChild(img);
+    } else {
+        // Use gradient avatar
+        const style = avatarStyles[expertName];
+        if (style) {
+            avatarDiv.style.cssText = `width:80px;height:80px;border-radius:50%;background:${style.gradient};display:flex;align-items:center;justify-content:center;color:white;font-size:32px;font-weight:bold;margin-bottom:10px;`;
+            avatarDiv.textContent = style.letter;
+        }
+    }
+    
+    return avatarDiv;
+}
 
 function selectCategory(cat) {
     category = cat;
@@ -514,64 +579,102 @@ async function submitQuestion() {
 
 
 function displayExpert(expert, index) {
+    let container = document.getElementById("expertContainer");
+    let card = document.createElement("div");
+    card.className = "expert-card";
 
-    let container =
-        document.getElementById(
-            "expertContainer"
-        );
+    // Trim expert name to handle any whitespace issues
+    const expertName = expert.name.trim();
 
-    let card =
-        document.createElement("div");
+    // Create avatar element directly
+    const avatarStyles = {
+        'Vikash': {gradient: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)', letter: 'V'},
+        'Vidhi': {gradient: 'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)', letter: 'V'},
+        'Varun': {gradient: 'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)', letter: 'V'},
+        'Yashaswi': {gradient: 'linear-gradient(135deg, #fa709a 0%, #fee140 100%)', letter: 'Y'}
+    };
+    
+    const style = avatarStyles[expertName];
+    if (style) {
+        const avatarDiv = document.createElement('div');
+        avatarDiv.style.width = '80px';
+        avatarDiv.style.height = '80px';
+        avatarDiv.style.borderRadius = '50%';
+        avatarDiv.style.background = style.gradient;
+        avatarDiv.style.display = 'flex';
+        avatarDiv.style.alignItems = 'center';
+        avatarDiv.style.justifyContent = 'center';
+        avatarDiv.style.color = 'white';
+        avatarDiv.style.fontSize = '32px';
+        avatarDiv.style.fontWeight = 'bold';
+        avatarDiv.style.marginBottom = '10px';
+        avatarDiv.textContent = style.letter;
+        card.appendChild(avatarDiv);
+    }
 
-    card.className =
-        "expert-card";
+    // Create name with gradient background
+    let nameEl = document.createElement("h3");
+    nameEl.textContent = expertName;
+    if (style) {
+        nameEl.style.background = style.gradient;
+        nameEl.style.color = 'white';
+        nameEl.style.padding = '8px 16px';
+        nameEl.style.borderRadius = '8px';
+        nameEl.style.textAlign = 'center';
+        nameEl.style.marginBottom = '12px';
+    }
+    card.appendChild(nameEl);
 
-    card.innerHTML = `
+    // Create profession
+    let profEl = document.createElement("p");
+    profEl.textContent = expert.profession;
+    card.appendChild(profEl);
 
-        <img src="https://via.placeholder.com/80">
+    // Create experience
+    let expEl = document.createElement("p");
+    expEl.textContent = expert.experience + " years experience";
+    card.appendChild(expEl);
 
-        <h3>${expert.name}</h3>
+    // Create phone
+    let phoneEl = document.createElement("p");
+    phoneEl.textContent = "📞 " + expert.phone;
+    card.appendChild(phoneEl);
 
-        <p>${expert.profession}</p>
+    // Create email
+    let emailEl = document.createElement("p");
+    emailEl.textContent = "✉️ " + expert.email;
+    card.appendChild(emailEl);
 
-        <p>${expert.experience} years experience</p>
+    // Create languages
+    let langEl = document.createElement("p");
+    langEl.textContent = "🌍 Languages: " + expert.languages;
+    card.appendChild(langEl);
 
-        <p>📞 ${expert.phone}</p>
+    // Create rating
+    let ratingEl = document.createElement("p");
+    ratingEl.textContent = "⭐ Rating: " + (expert.rating ? expert.rating.toFixed(1) : "No rating yet");
+    card.appendChild(ratingEl);
 
-        <p>✉️ ${expert.email}</p>
+    // Create buttons container
+    let btnContainer = document.createElement("div");
 
-        <p>🌍 Languages: ${expert.languages}</p>
+    let bookBtn = document.createElement("button");
+    bookBtn.textContent = "Book";
+    bookBtn.onclick = function() { bookExpert(expertName, expert.email); };
+    btnContainer.appendChild(bookBtn);
 
-      
+    let reviewBtn = document.createElement("button");
+    reviewBtn.textContent = "Give Review";
+    reviewBtn.onclick = function() { openReviewModal(expert._id); };
+    btnContainer.appendChild(reviewBtn);
 
-        <p>⭐ Rating: ${expert.rating ? expert.rating.toFixed(1) : "No rating yet"}</p>
+    card.appendChild(btnContainer);
 
-
-
-
-
-        <button onclick="bookExpert('${expert.name}','${expert.email}')">
-        Book
-        </button>
-
-        
-
-         <button onclick="openReviewModal('${expert._id}')">
-        Give Review
-         </button>
-
-
-
-        <br>
-
-        <button
-        class="delete-btn"
-        onclick="deleteExpert(${index})"
-        >
-        Delete
-        </button>
-
-    `;
+    let deleteBtn = document.createElement("button");
+    deleteBtn.className = "delete-btn";
+    deleteBtn.textContent = "Delete";
+    deleteBtn.onclick = function() { deleteExpert(index); };
+    card.appendChild(deleteBtn);
 
     container.appendChild(card);
 }
@@ -863,6 +966,7 @@ async function submitReview() {
 
 window.onload = async function () {
 
+    loadStoredImages();
     await loadExperts();
 
 };

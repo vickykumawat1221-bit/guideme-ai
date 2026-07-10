@@ -1,9 +1,21 @@
-from rest_framework.decorators import api_view
-from rest_framework.response import Response
+from django.http import JsonResponse
+from django.views.decorators.http import require_http_methods
+from django.views.decorators.csrf import csrf_exempt
+import json
 from .models import Expert, Booking
 
-@api_view(['GET', 'POST'])
+def add_cors_headers(response):
+    response['Access-Control-Allow-Origin'] = '*'
+    response['Access-Control-Allow-Methods'] = 'GET, POST, OPTIONS'
+    response['Access-Control-Allow-Headers'] = 'Content-Type'
+    return response
+
+@csrf_exempt
+@require_http_methods(["GET", "POST", "OPTIONS"])
 def experts(request):
+
+    if request.method == 'OPTIONS':
+        return add_cors_headers(JsonResponse({}))
 
     if request.method == 'GET':
 
@@ -20,29 +32,43 @@ def experts(request):
                 "experience": expert.experience,
                 "phone": expert.phone,
                 "email": expert.email,
-                "languages": expert.languages
+                "languages": expert.languages,
+                "_id": str(expert.id)
             })
 
-        return Response(data)
+        response = JsonResponse(data, safe=False)
+        return add_cors_headers(response)
 
     elif request.method == 'POST':
 
-        expert = Expert.objects.create(
-            name=request.data.get('name'),
-            profession=request.data.get('profession'),
-            experience=request.data.get('experience'),
-            phone=request.data.get('phone'),
-            email=request.data.get('email'),
-            languages=request.data.get('languages')
-        )
+        try:
+            data = json.loads(request.body)
+            expert = Expert.objects.create(
+                name=data.get('name'),
+                profession=data.get('profession'),
+                experience=data.get('experience'),
+                phone=data.get('phone'),
+                email=data.get('email'),
+                languages=data.get('languages')
+            )
 
-        return Response({
-            "message": "Expert Created"
-        })
+            response = JsonResponse({
+                "message": "Expert Created"
+            })
+            return add_cors_headers(response)
+        except Exception as e:
+            response = JsonResponse({
+                "error": str(e)
+            }, status=400)
+            return add_cors_headers(response)
 
 
-@api_view(['GET', 'POST'])
+@csrf_exempt
+@require_http_methods(["GET", "POST", "OPTIONS"])
 def bookings(request):
+
+    if request.method == 'OPTIONS':
+        return add_cors_headers(JsonResponse({}))
 
     if request.method == 'GET':
 
@@ -61,19 +87,28 @@ def bookings(request):
                 "urgency": booking.urgency
             })
 
-        return Response(data)
+        response = JsonResponse(data, safe=False)
+        return add_cors_headers(response)
 
     elif request.method == 'POST':
 
-        Booking.objects.create(
-            expertName=request.data.get('expertName'),
-            userName=request.data.get('userName'),
-            contact=request.data.get('contact'),
-            problem=request.data.get('problem'),
-            method=request.data.get('method'),
-            urgency=request.data.get('urgency')
-        )
+        try:
+            data = json.loads(request.body)
+            Booking.objects.create(
+                expertName=data.get('expertName'),
+                userName=data.get('userName'),
+                contact=data.get('contact'),
+                problem=data.get('problem'),
+                method=data.get('method'),
+                urgency=data.get('urgency')
+            )
 
-        return Response({
-            "message": "Booking Saved"
-        })
+            response = JsonResponse({
+                "message": "Booking Saved"
+            })
+            return add_cors_headers(response)
+        except Exception as e:
+            response = JsonResponse({
+                "error": str(e)
+            }, status=400)
+            return add_cors_headers(response)
