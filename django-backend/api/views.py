@@ -3,12 +3,13 @@ from django.views.decorators.http import require_http_methods
 from django.views.decorators.csrf import csrf_exempt
 import json
 from .models import Expert, Booking
-
+from .ai import recommend_experts
 def add_cors_headers(response):
     response['Access-Control-Allow-Origin'] = '*'
-    response['Access-Control-Allow-Methods'] = 'GET, POST, OPTIONS'
+    response['Access-Control-Allow-Methods'] = 'GET, POST, DELETE, OPTIONS'
     response['Access-Control-Allow-Headers'] = 'Content-Type'
     return response
+
 
 @csrf_exempt
 @require_http_methods(["GET", "POST", "OPTIONS"])
@@ -43,7 +44,8 @@ def experts(request):
 
         try:
             data = json.loads(request.body)
-            expert = Expert.objects.create(
+
+            Expert.objects.create(
                 name=data.get('name'),
                 profession=data.get('profession'),
                 experience=data.get('experience'),
@@ -56,10 +58,13 @@ def experts(request):
                 "message": "Expert Created"
             })
             return add_cors_headers(response)
+
         except Exception as e:
+
             response = JsonResponse({
                 "error": str(e)
             }, status=400)
+
             return add_cors_headers(response)
 
 
@@ -94,6 +99,7 @@ def bookings(request):
 
         try:
             data = json.loads(request.body)
+
             Booking.objects.create(
                 expertName=data.get('expertName'),
                 userName=data.get('userName'),
@@ -106,9 +112,86 @@ def bookings(request):
             response = JsonResponse({
                 "message": "Booking Saved"
             })
+
             return add_cors_headers(response)
+
         except Exception as e:
+
             response = JsonResponse({
                 "error": str(e)
             }, status=400)
+
             return add_cors_headers(response)
+
+
+# ---------------- DELETE EXPERT ----------------
+
+@csrf_exempt
+@require_http_methods(["DELETE", "OPTIONS"])
+def delete_expert(request, id):
+
+    if request.method == "OPTIONS":
+        return add_cors_headers(JsonResponse({}))
+
+    try:
+        expert = Expert.objects.get(id=id)
+        expert.delete()
+
+        response = JsonResponse({
+            "message": "Expert deleted successfully"
+        })
+
+        return add_cors_headers(response)
+
+    except Expert.DoesNotExist:
+
+        response = JsonResponse({
+            "error": "Expert not found"
+        }, status=404)
+
+        return add_cors_headers(response)
+    
+    # ---------------- AI RECOMMEND EXPERTS ----------------
+
+@csrf_exempt
+@require_http_methods(["POST", "OPTIONS"])
+def recommend(request):
+
+    if request.method == "OPTIONS":
+        return add_cors_headers(JsonResponse({}))
+
+    try:
+
+        data = json.loads(request.body)
+
+        question = data.get("question", "")
+
+        experts = Expert.objects.all()
+
+        matched = recommend_experts(question, experts)
+
+        result = []
+
+        for expert in matched:
+
+            result.append({
+                "id": expert.id,
+                "name": expert.name,
+                "profession": expert.profession,
+                "experience": expert.experience,
+                "phone": expert.phone,
+                "email": expert.email,
+                "languages": expert.languages
+            })
+
+        response = JsonResponse(result, safe=False)
+
+        return add_cors_headers(response)
+
+    except Exception as e:
+
+        response = JsonResponse({
+            "error": str(e)
+        }, status=400)
+
+        return add_cors_headers(response)
