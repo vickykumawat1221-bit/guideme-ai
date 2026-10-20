@@ -1,0 +1,1745 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta name="description" content="GuideMe AI — AI-powered expert matching and consultation." />
+<title>GuideMe AI — Find the right expert</title>
+<style>
+  :root {
+    --ink: #0f172a;
+    --muted: #64748b;
+    --line: #e2e8f0;
+    --surface: #ffffff;
+    --canvas: #f6f7fb;
+    --brand: #4f46e5;
+    --brand-2: #7c3aed;
+    --brand-soft: #eef2ff;
+    --success: #059669;
+    --warn: #d97706;
+    --danger: #dc2626;
+    --radius: 18px;
+    --shadow: 0 18px 45px rgba(15, 23, 42, 0.08);
+    --shadow-sm: 0 8px 22px rgba(15, 23, 42, 0.06);
+  }
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    margin: 0;
+    font-family: "Inter", ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+    color: var(--ink);
+    background: var(--canvas);
+    line-height: 1.55;
+    -webkit-font-smoothing: antialiased;
+  }
+  body.no-scroll { overflow: hidden; }
+  a { color: inherit; }
+  button, input, select, textarea { font: inherit; }
+  .hidden { display: none !important; }
+  .sr-only {
+    position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
+    overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; border: 0;
+  }
+
+  /* ---------- Shell ---------- */
+  .nav {
+    position: sticky; top: 0; z-index: 40;
+    display: flex; align-items: center; gap: 18px;
+    padding: 14px clamp(16px, 4vw, 48px);
+    background: rgba(255, 255, 255, 0.86);
+    backdrop-filter: blur(16px);
+    border-bottom: 1px solid rgba(226, 232, 240, 0.8);
+  }
+  .brand { display: flex; align-items: center; gap: 10px; text-decoration: none; font-weight: 800; letter-spacing: -0.02em; }
+  .brand-mark {
+    width: 36px; height: 36px; border-radius: 12px; display: grid; place-items: center;
+    color: #fff; background: linear-gradient(135deg, var(--brand), var(--brand-2));
+    box-shadow: 0 8px 20px rgba(79, 70, 229, 0.35); font-size: 18px;
+  }
+  .nav-links { display: flex; gap: 22px; margin-left: 12px; }
+  .nav-links a { text-decoration: none; color: var(--muted); font-weight: 600; font-size: 0.92rem; white-space: nowrap; }
+  .nav-links a:hover { color: var(--ink); }
+  .nav-actions { margin-left: auto; display: flex; align-items: center; gap: 10px; }
+  .pill {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 5px 10px; border-radius: 999px; font-size: 0.75rem; font-weight: 700;
+    background: var(--brand-soft); color: var(--brand);
+    border: 1px solid rgba(79, 70, 229, 0.18); white-space: nowrap;
+  }
+  .dot { width: 7px; height: 7px; border-radius: 50%; background: var(--success); }
+
+  /* ---------- Buttons ---------- */
+  .btn {
+    border: 1px solid transparent; border-radius: 12px; padding: 10px 16px;
+    font-weight: 700; font-size: 0.9rem; cursor: pointer;
+    transition: transform 0.15s ease, box-shadow 0.15s ease, background 0.15s ease;
+    display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+    white-space: nowrap;
+  }
+  .btn:hover { transform: translateY(-1px); }
+  .btn:active { transform: translateY(0); }
+  .btn.primary { background: linear-gradient(135deg, var(--brand), var(--brand-2)); color: #fff; box-shadow: 0 10px 24px rgba(79, 70, 229, 0.3); }
+  .btn.secondary { background: #fff; border-color: var(--line); color: var(--ink); box-shadow: var(--shadow-sm); }
+  .btn.ghost { background: transparent; color: var(--muted); }
+  .btn.ghost:hover { color: var(--ink); background: #eef2ff; }
+  .btn.danger { background: #fef2f2; color: var(--danger); border-color: #fecaca; }
+  .btn.small { padding: 7px 11px; font-size: 0.8rem; border-radius: 9px; }
+  .btn:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
+
+  /* ---------- Layout ---------- */
+  main { max-width: 1200px; margin: 0 auto; padding: 0 clamp(16px, 4vw, 32px) 60px; }
+  .section { padding: 46px 0 8px; scroll-margin-top: 88px; }
+  .hero { scroll-margin-top: 88px; }
+  .section-head { display: flex; align-items: flex-end; justify-content: space-between; gap: 18px; margin-bottom: 20px; flex-wrap: wrap; }
+  .section-head h2 { margin: 0; font-size: clamp(1.35rem, 2.4vw, 1.8rem); letter-spacing: -0.03em; }
+  .section-head p { margin: 4px 0 0; color: var(--muted); font-size: 0.92rem; }
+  .eyebrow {
+    display: inline-block; text-transform: uppercase; letter-spacing: 0.14em;
+    font-size: 0.72rem; font-weight: 800; color: var(--brand);
+  }
+
+  /* ---------- Hero ---------- */
+  .hero { position: relative; padding: clamp(34px, 6vw, 68px) 0 22px; }
+  .hero::before {
+    content: ""; position: absolute; inset: 10% -12% auto -12%; height: 340px;
+    background: radial-gradient(circle at 20% 30%, rgba(124, 58, 237, 0.16), transparent 55%),
+                radial-gradient(circle at 80% 10%, rgba(14, 165, 233, 0.14), transparent 50%);
+    filter: blur(10px); z-index: -1;
+  }
+  .hero h1 { margin: 10px 0 12px; font-size: clamp(2.1rem, 5vw, 3.5rem); line-height: 1.06; letter-spacing: -0.045em; max-width: 16ch; }
+  .hero h1 em { font-style: normal; background: linear-gradient(135deg, var(--brand), var(--brand-2)); -webkit-background-clip: text; background-clip: text; color: transparent; }
+  .hero p.lead { margin: 0; color: var(--muted); max-width: 62ch; font-size: 1.02rem; }
+  .ask-box {
+    margin-top: 26px; background: var(--surface); border: 1px solid var(--line);
+    border-radius: 22px; padding: 14px; box-shadow: var(--shadow); max-width: 820px;
+  }
+  .ask-box textarea {
+    width: 100%; min-height: 96px; resize: vertical; border: 0; outline: none;
+    background: transparent; padding: 8px 10px; font-size: 1rem; color: var(--ink);
+  }
+  .ask-box textarea::placeholder { color: #94a3b8; }
+  .ask-actions { display: flex; align-items: flex-end; justify-content: space-between; gap: 12px; flex-wrap: wrap; padding: 4px 4px 2px; }
+  .example-chips { display: flex; flex-wrap: wrap; gap: 7px; }
+  .chip {
+    border: 1px solid var(--line); background: #f8fafc; color: var(--muted);
+    border-radius: 999px; padding: 6px 11px; font-size: 0.78rem; cursor: pointer;
+    transition: all 0.15s ease;
+  }
+  .chip:hover { border-color: #c7d2fe; color: var(--brand); background: var(--brand-soft); }
+  .hero-stats { display: flex; gap: 30px; flex-wrap: wrap; margin-top: 22px; color: var(--muted); font-size: 0.86rem; }
+  .hero-stats b { display: block; color: var(--ink); font-size: 1.25rem; letter-spacing: -0.02em; }
+
+  /* ---------- Grids ---------- */
+  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(270px, 1fr)); gap: 16px; }
+  .expert-card {
+    background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius);
+    padding: 18px; box-shadow: var(--shadow-sm); display: flex; flex-direction: column; gap: 12px;
+    transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease;
+    position: relative;
+  }
+  .expert-card:hover { transform: translateY(-3px); box-shadow: var(--shadow); border-color: #c7d2fe; }
+  .card-top { display: flex; gap: 12px; align-items: flex-start; }
+  .avatar {
+    width: 52px; height: 52px; border-radius: 16px; flex: 0 0 auto;
+    display: grid; place-items: center; color: #fff; font-weight: 800; font-size: 1.1rem;
+    box-shadow: inset 0 -10px 20px rgba(0,0,0,0.08);
+  }
+  .card-id { min-width: 0; flex: 1; }
+  .card-id h3 { margin: 0; font-size: 1.02rem; letter-spacing: -0.02em; display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+  .card-id .prof { margin: 1px 0 0; color: var(--muted); font-size: 0.84rem; }
+  .verified { color: var(--brand); font-size: 0.75rem; }
+  .cat-tag {
+    align-self: flex-start; font-size: 0.68rem; font-weight: 800; text-transform: uppercase;
+    letter-spacing: 0.06em; color: var(--brand); background: var(--brand-soft);
+    padding: 3px 8px; border-radius: 999px;
+  }
+  .rating-row { display: flex; align-items: center; gap: 7px; font-size: 0.8rem; color: var(--muted); }
+  .stars { color: #f59e0b; letter-spacing: 1px; font-size: 0.82rem; }
+  .bio { margin: 0; color: var(--muted); font-size: 0.85rem; min-height: 2.4em; }
+  .meta-list { display: flex; flex-wrap: wrap; gap: 6px; }
+  .meta-item { font-size: 0.72rem; color: #475569; background: #f1f5f9; padding: 4px 8px; border-radius: 7px; }
+  .card-actions { display: flex; gap: 8px; margin-top: auto; }
+  .card-actions .btn { flex: 1; }
+  .score-wrap { position: absolute; top: 14px; right: 14px; }
+  .score-ring {
+    --p: 0;
+    width: 54px; height: 54px; border-radius: 50%;
+    background: conic-gradient(var(--brand) calc(var(--p) * 1%), #e2e8f0 0);
+    display: grid; place-items: center; box-shadow: 0 6px 16px rgba(79,70,229,0.18);
+  }
+  .score-ring::before { content: ""; position: absolute; width: 42px; height: 42px; border-radius: 50%; background: #fff; }
+  .score-ring span { position: relative; font-size: 0.72rem; font-weight: 800; color: var(--brand); }
+  .match-reason { font-size: 0.76rem; color: #4338ca; background: #eef2ff; border: 1px dashed #c7d2fe; border-radius: 10px; padding: 7px 9px; }
+
+  /* ---------- Categories ---------- */
+  .category-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 12px; }
+  .category-card {
+    background: var(--surface); border: 1px solid var(--line); border-radius: 16px;
+    padding: 16px; cursor: pointer; text-align: left; transition: all 0.16s ease;
+  }
+  .category-card:hover { border-color: #c7d2fe; background: #fafaff; transform: translateY(-2px); }
+  .category-card .emoji { font-size: 1.5rem; }
+  .category-card h3 { margin: 8px 0 2px; font-size: 0.98rem; }
+  .category-card p { margin: 0; color: var(--muted); font-size: 0.78rem; }
+  .category-card .count { margin-top: 8px; font-size: 0.72rem; font-weight: 700; color: var(--brand); }
+
+  /* ---------- Filters ---------- */
+  .filters { display: flex; gap: 9px; flex-wrap: wrap; align-items: center; }
+  .field {
+    border: 1px solid var(--line); background: #fff; border-radius: 11px;
+    padding: 9px 12px; font-size: 0.86rem; color: var(--ink); outline: none;
+  }
+  .field:focus { border-color: var(--brand); box-shadow: 0 0 0 3px rgba(79,70,229,0.12); }
+  .search { min-width: 210px; }
+
+  /* ---------- Insights ---------- */
+  .stat-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; margin-bottom: 14px; }
+  .stat {
+    background: var(--surface); border: 1px solid var(--line); border-radius: 15px;
+    padding: 16px; box-shadow: var(--shadow-sm);
+  }
+  .stat .label { color: var(--muted); font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; }
+  .stat .value { font-size: 1.9rem; font-weight: 800; letter-spacing: -0.04em; margin-top: 2px; }
+  .stat .hint { color: var(--muted); font-size: 0.74rem; }
+  .insight-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 14px; }
+  .panel { background: var(--surface); border: 1px solid var(--line); border-radius: 16px; padding: 16px; box-shadow: var(--shadow-sm); }
+  .panel h3 { margin: 0 0 12px; font-size: 0.92rem; }
+  .bars { display: flex; align-items: flex-end; gap: 8px; height: 110px; }
+  .bar-col { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 6px; height: 100%; justify-content: flex-end; }
+  .bar { width: 100%; max-width: 34px; border-radius: 7px 7px 3px 3px; background: linear-gradient(180deg, var(--brand), var(--brand-2)); min-height: 3px; transition: height 0.4s ease; }
+  .bar-col small { color: var(--muted); font-size: 0.68rem; }
+  .bar-col b { font-size: 0.7rem; }
+  .hbar { display: grid; grid-template-columns: 88px 1fr 28px; align-items: center; gap: 9px; margin-bottom: 9px; font-size: 0.76rem; }
+  .hbar .track { height: 8px; background: #eef2ff; border-radius: 999px; overflow: hidden; }
+  .hbar .fill { height: 100%; background: linear-gradient(90deg, var(--brand), var(--brand-2)); border-radius: 999px; }
+  .donut-wrap { display: flex; align-items: center; gap: 18px; }
+  .donut {
+    width: 118px; height: 118px; border-radius: 50%; position: relative; flex: 0 0 auto;
+    background: conic-gradient(#e2e8f0 0 100%);
+  }
+  .donut::after { content: ""; position: absolute; inset: 20px; border-radius: 50%; background: #fff; }
+  .donut-center { position: absolute; inset: 0; display: grid; place-items: center; z-index: 1; text-align: center; }
+  .donut-center b { font-size: 1.2rem; display: block; line-height: 1; }
+  .donut-center small { color: var(--muted); font-size: 0.64rem; }
+  .legend { display: grid; gap: 7px; font-size: 0.76rem; }
+  .legend span { display: inline-block; width: 9px; height: 9px; border-radius: 3px; margin-right: 6px; }
+  .top-list { margin: 0; padding-left: 20px; display: grid; gap: 10px; font-size: 0.82rem; }
+  .top-list li::marker { color: var(--brand); font-weight: 800; }
+  .top-list small { color: var(--muted); display: block; }
+
+  /* ---------- Bookings ---------- */
+  .booking-list { display: grid; gap: 10px; }
+  .booking {
+    background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 14px 16px;
+    display: flex; gap: 16px; align-items: center; justify-content: space-between; flex-wrap: wrap;
+  }
+  .booking-main { min-width: 0; }
+  .booking-main h4 { margin: 0 0 2px; font-size: 0.92rem; }
+  .booking-main p { margin: 0; color: var(--muted); font-size: 0.78rem; }
+  .booking-side { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+  .ref { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 0.72rem; background: #f1f5f9; padding: 4px 7px; border-radius: 6px; }
+  .status { font-size: 0.7rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.05em; padding: 4px 9px; border-radius: 999px; }
+  .status.pending { background: #fef3c7; color: #92400e; }
+  .status.confirmed { background: #d1fae5; color: #065f46; }
+  .status.completed { background: #dbeafe; color: #1e40af; }
+  .status.cancelled { background: #fee2e2; color: #991b1b; }
+  .empty { color: var(--muted); text-align: center; padding: 30px; border: 1px dashed var(--line); border-radius: 16px; font-size: 0.9rem; }
+
+  /* ---------- Modal ---------- */
+  .modal {
+    position: fixed; inset: 0; z-index: 90; display: none; align-items: center; justify-content: center;
+    padding: 16px; background: rgba(15, 23, 42, 0.55); backdrop-filter: blur(4px);
+  }
+  .modal.open { display: flex; }
+  .modal-card {
+    width: 100%; max-width: 520px; max-height: 92vh; overflow-y: auto;
+    background: #fff; border-radius: 20px; padding: 22px; box-shadow: 0 30px 70px rgba(15,23,42,0.35);
+    animation: pop 0.18s ease;
+  }
+  .modal-card.wide { max-width: 640px; }
+  @keyframes pop { from { transform: translateY(10px) scale(0.985); opacity: 0; } to { transform: none; opacity: 1; } }
+  .modal-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; margin-bottom: 8px; }
+  .modal-head h2 { margin: 0; font-size: 1.2rem; letter-spacing: -0.02em; }
+  .modal-head p { margin: 3px 0 0; color: var(--muted); font-size: 0.82rem; }
+  .icon-btn { border: 1px solid var(--line); background: #fff; width: 34px; height: 34px; border-radius: 10px; cursor: pointer; color: var(--muted); font-size: 1rem; }
+  .icon-btn:hover { color: var(--ink); background: #f8fafc; }
+  .form-grid { display: grid; gap: 12px; margin-top: 14px; }
+  .form-grid.two { grid-template-columns: 1fr 1fr; }
+  .form-field { display: grid; gap: 5px; }
+  .form-field label { font-size: 0.76rem; font-weight: 700; color: #334155; }
+  .form-field input, .form-field select, .form-field textarea {
+    width: 100%; border: 1px solid var(--line); background: #fff; border-radius: 10px;
+    padding: 10px 12px; outline: none; font-size: 0.9rem; color: var(--ink);
+  }
+  .form-field textarea { min-height: 84px; resize: vertical; }
+  .form-field input:focus, .form-field select:focus, .form-field textarea:focus { border-color: var(--brand); box-shadow: 0 0 0 3px rgba(79,70,229,0.12); }
+  .modal-actions { display: flex; gap: 9px; margin-top: 16px; }
+  .modal-actions .btn { flex: 1; }
+  .tabs { display: flex; gap: 4px; background: #f1f5f9; padding: 4px; border-radius: 12px; margin-top: 12px; }
+  .tab { flex: 1; border: 0; background: transparent; padding: 8px; border-radius: 9px; font-weight: 700; font-size: 0.85rem; color: var(--muted); cursor: pointer; }
+  .tab.active { background: #fff; color: var(--ink); box-shadow: var(--shadow-sm); }
+  .form-note { margin: 10px 0 0; font-size: 0.76rem; color: var(--muted); }
+  .form-error { margin: 10px 0 0; font-size: 0.8rem; color: var(--danger); font-weight: 600; }
+  .star-picker { display: flex; gap: 4px; }
+  .star-picker button { border: 0; background: transparent; font-size: 1.55rem; cursor: pointer; color: #cbd5e1; padding: 0 2px; line-height: 1; }
+  .star-picker button.on { color: #f59e0b; }
+
+  /* ---------- Reviews ---------- */
+  .review-summary { display: flex; gap: 18px; align-items: center; padding: 12px; background: #f8fafc; border-radius: 12px; margin-top: 12px; }
+  .big-rating { font-size: 2rem; font-weight: 800; letter-spacing: -0.04em; line-height: 1; }
+  .dist { flex: 1; display: grid; gap: 4px; }
+  .dist-row { display: grid; grid-template-columns: 12px 1fr 22px; gap: 7px; align-items: center; font-size: 0.7rem; color: var(--muted); }
+  .dist-track { height: 6px; background: #e2e8f0; border-radius: 999px; overflow: hidden; }
+  .dist-fill { height: 100%; background: #f59e0b; }
+  .review-list { display: grid; gap: 10px; margin-top: 14px; max-height: 210px; overflow-y: auto; padding-right: 4px; }
+  .review { border-bottom: 1px solid #f1f5f9; padding-bottom: 9px; }
+  .review:last-child { border-bottom: 0; }
+  .review-head { display: flex; justify-content: space-between; gap: 10px; font-size: 0.8rem; }
+  .review-head b { font-size: 0.84rem; }
+  .review p { margin: 3px 0 0; font-size: 0.83rem; color: var(--muted); }
+
+  /* ---------- Assistant ---------- */
+  .fab {
+    position: fixed; right: 22px; bottom: 22px; z-index: 60;
+    width: 58px; height: 58px; border-radius: 50%; border: 0; cursor: pointer;
+    background: linear-gradient(135deg, var(--brand), var(--brand-2)); color: #fff;
+    font-size: 1.35rem; box-shadow: 0 16px 36px rgba(79, 70, 229, 0.4);
+    transition: transform 0.2s ease;
+  }
+  .fab:hover { transform: translateY(-2px) scale(1.04); }
+  .assistant-panel {
+    position: fixed; right: 22px; bottom: 90px; z-index: 61; width: min(380px, calc(100vw - 32px));
+    height: min(560px, calc(100vh - 140px)); background: #fff; border: 1px solid var(--line);
+    border-radius: 20px; box-shadow: 0 30px 70px rgba(15,23,42,0.28); display: flex; flex-direction: column;
+    overflow: hidden;
+  }
+  .assistant-head { padding: 14px 16px; background: linear-gradient(135deg, var(--brand), var(--brand-2)); color: #fff; display: flex; align-items: center; gap: 10px; }
+  .assistant-head b { font-size: 0.95rem; }
+  .assistant-head small { opacity: 0.85; display: block; font-size: 0.72rem; }
+  .assistant-head .icon-btn { margin-left: auto; color: #fff; border-color: rgba(255,255,255,0.35); background: transparent; }
+  .chat { flex: 1; overflow-y: auto; padding: 14px; display: flex; flex-direction: column; gap: 10px; background: #f8fafc; }
+  .msg { max-width: 88%; padding: 9px 12px; border-radius: 14px; font-size: 0.84rem; white-space: pre-wrap; }
+  .msg.bot { background: #fff; border: 1px solid var(--line); border-bottom-left-radius: 4px; align-self: flex-start; }
+  .msg.user { background: linear-gradient(135deg, var(--brand), var(--brand-2)); color: #fff; border-bottom-right-radius: 4px; align-self: flex-end; }
+  .suggestions { display: grid; gap: 7px; align-self: stretch; }
+  .suggestion {
+    display: flex; align-items: center; gap: 9px; text-align: left; cursor: pointer;
+    background: #fff; border: 1px solid #c7d2fe; border-radius: 11px; padding: 8px 10px;
+  }
+  .suggestion:hover { background: var(--brand-soft); }
+  .suggestion b { font-size: 0.8rem; display: block; }
+  .suggestion small { color: var(--muted); font-size: 0.72rem; }
+  .suggestion .score-badge { margin-left: auto; font-size: 0.7rem; font-weight: 800; color: var(--brand); background: var(--brand-soft); padding: 3px 7px; border-radius: 999px; }
+  .chat-input { display: flex; gap: 8px; padding: 10px; border-top: 1px solid var(--line); background: #fff; }
+  .chat-input textarea { flex: 1; border: 1px solid var(--line); border-radius: 11px; padding: 9px 11px; resize: none; min-height: 42px; max-height: 100px; outline: none; font-size: 0.86rem; }
+  .chat-input textarea:focus { border-color: var(--brand); }
+  .typing { color: var(--muted); font-size: 0.78rem; font-style: italic; }
+
+  /* ---------- Footer ---------- */
+  footer { border-top: 1px solid var(--line); background: #fff; margin-top: 40px; }
+  .footer-inner { max-width: 1200px; margin: 0 auto; padding: 24px clamp(16px, 4vw, 32px); display: flex; justify-content: space-between; gap: 16px; flex-wrap: wrap; color: var(--muted); font-size: 0.8rem; }
+
+  /* ---------- Toasts ---------- */
+  #toasts { position: fixed; z-index: 120; left: 50%; bottom: 24px; transform: translateX(-50%); display: grid; gap: 8px; width: min(420px, calc(100vw - 32px)); }
+  .toast {
+    background: #0f172a; color: #fff; border-radius: 12px; padding: 11px 14px; font-size: 0.85rem;
+    box-shadow: 0 16px 40px rgba(15,23,42,0.3); animation: rise 0.2s ease;
+    display: flex; align-items: center; gap: 9px;
+  }
+  .toast.success { background: #065f46; }
+  .toast.error { background: #991b1b; }
+  @keyframes rise { from { transform: translateY(8px); opacity: 0; } to { transform: none; opacity: 1; } }
+
+  @media (max-width: 720px) {
+    .nav-links { display: none; }
+    .nav { gap: 10px; }
+    .hero h1 { max-width: none; }
+    .form-grid.two { grid-template-columns: 1fr; }
+    .booking { align-items: flex-start; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    * { animation: none !important; transition: none !important; scroll-behavior: auto !important; }
+  }
+</style>
+</head>
+<body>
+<a class="sr-only" href="#experts">Skip to experts</a>
+
+<header class="nav">
+  <a class="brand" href="#top" aria-label="GuideMe AI home">
+    <span class="brand-mark" aria-hidden="true">✦</span>
+    <span>GuideMe<span style="color:var(--brand)">AI</span></span>
+  </a>
+  <nav class="nav-links" aria-label="Primary">
+    <a href="#categories">Categories</a>
+    <a href="#experts">Experts</a>
+    <a href="#insights">Insights</a>
+    <a href="#bookings">My bookings</a>
+  </nav>
+  <div class="nav-actions">
+    <span class="pill" id="aiModeBadge" title="Backend AI mode"><span class="dot"></span> connecting…</span>
+    <button class="btn secondary small" id="authBtn">Sign in</button>
+    <button class="btn ghost small hidden" id="logoutBtn">Sign out</button>
+  </div>
+</header>
+
+<main id="top">
+  <section class="hero">
+    <span class="eyebrow">AI-powered expert matching</span>
+    <h1>Find the <em>right</em> expert, not just any expert.</h1>
+    <p class="lead">
+      Describe what you're dealing with in your own words. GuideMe scores every expert on
+      semantic relevance, category fit, community ratings and experience — then shows you
+      <em>why</em> each match was chosen.
+    </p>
+
+    <div class="ask-box">
+      <label class="sr-only" for="question">Your question</label>
+      <textarea id="question" placeholder="e.g. I've been feeling burnt out at work and can't sleep…"></textarea>
+      <div class="ask-actions">
+        <div class="example-chips" id="exampleChips"></div>
+        <button class="btn primary" id="askBtn">Get AI matches →</button>
+      </div>
+    </div>
+
+    <div class="hero-stats" id="heroStats" aria-live="polite"></div>
+  </section>
+
+  <section class="section hidden" id="results" aria-live="polite">
+    <div class="section-head">
+      <div>
+        <h2>AI matches</h2>
+        <p id="resultQuery"></p>
+      </div>
+      <div class="pill" id="resultMeta">—</div>
+    </div>
+    <div class="grid" id="resultsGrid"></div>
+  </section>
+
+  <section class="section" id="categories">
+    <div class="section-head">
+      <div>
+        <h2>Browse by category</h2>
+        <p>Jump straight to the area you need help with.</p>
+      </div>
+    </div>
+    <div class="category-grid" id="categoryGrid"></div>
+  </section>
+
+  <section class="section" id="experts">
+    <div class="section-head">
+      <div>
+        <h2>Experts</h2>
+        <p id="expertsCount">Loading…</p>
+      </div>
+      <div class="filters">
+        <label class="sr-only" for="searchInput">Search experts</label>
+        <input class="field search" id="searchInput" placeholder="Search name, skill, language…" />
+        <label class="sr-only" for="categoryFilter">Filter by category</label>
+        <select class="field" id="categoryFilter">
+          <option value="All">All categories</option>
+        </select>
+        <label class="sr-only" for="sortSelect">Sort experts</label>
+        <select class="field" id="sortSelect">
+          <option value="rating">Top rated</option>
+          <option value="experience">Most experienced</option>
+          <option value="newest">Newest</option>
+          <option value="name">Name A–Z</option>
+          <option value="rate_low">Lowest price</option>
+          <option value="rate_high">Highest price</option>
+        </select>
+        <button class="btn secondary" id="becomeExpertBtn">Become an expert</button>
+      </div>
+    </div>
+    <div class="grid" id="expertsGrid"></div>
+    <p class="empty hidden" id="expertsEmpty">No experts match those filters yet.</p>
+  </section>
+
+  <section class="section" id="insights">
+    <div class="section-head">
+      <div>
+        <h2>Live insights</h2>
+        <p>Aggregated from the API — refresh to see the latest activity.</p>
+      </div>
+      <button class="btn secondary small" id="refreshInsights">↻ Refresh</button>
+    </div>
+    <div class="stat-grid" id="statCards"></div>
+    <div class="insight-grid">
+      <div class="panel">
+        <h3>Bookings · last 7 days</h3>
+        <div class="bars" id="weekChart"></div>
+      </div>
+      <div class="panel">
+        <h3>Booking status</h3>
+        <div class="donut-wrap">
+          <div class="donut" id="statusDonut"><div class="donut-center"><div><b id="donutTotal">0</b><small>bookings</small></div></div></div>
+          <div class="legend" id="statusLegend"></div>
+        </div>
+      </div>
+      <div class="panel">
+        <h3>Top rated experts</h3>
+        <ol class="top-list" id="topExperts"><li class="typing">Loading…</li></ol>
+      </div>
+      <div class="panel">
+        <h3>Experts by category</h3>
+        <div id="categoryBars"></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section" id="bookings">
+    <div class="section-head">
+      <div>
+        <h2>My bookings</h2>
+        <p id="bookingHint">Sign in to track your consultation requests.</p>
+      </div>
+      <button class="btn secondary small" id="refreshBookings">↻ Refresh</button>
+    </div>
+    <div class="booking-list" id="bookingsList"></div>
+  </section>
+</main>
+
+<footer>
+  <div class="footer-inner">
+    <span>© 2026 GuideMe AI · Demo project</span>
+    <span>Ratings shown are community reviews. Not medical, legal or financial advice.</span>
+  </div>
+</footer>
+
+<button class="fab" id="assistantFab" aria-label="Open AI assistant" title="Ask the AI assistant">💬</button>
+<aside class="assistant-panel hidden" id="assistantPanel" aria-label="AI assistant">
+  <div class="assistant-head">
+    <span style="font-size:1.3rem">🤖</span>
+    <div>
+      <b>GuideMe Assistant</b>
+      <small>Routes you to the right expert</small>
+    </div>
+    <button class="icon-btn" id="assistantClose" aria-label="Close assistant">✕</button>
+  </div>
+  <div class="chat" id="chat"></div>
+  <div class="chat-input">
+    <label class="sr-only" for="chatInput">Message</label>
+    <textarea id="chatInput" rows="1" placeholder="Tell me what you need help with…"></textarea>
+    <button class="btn primary small" id="chatSend">Send</button>
+  </div>
+</aside>
+
+<!-- Auth modal -->
+<div class="modal" id="authModal" role="dialog" aria-modal="true" aria-labelledby="authTitle">
+  <div class="modal-card">
+    <div class="modal-head">
+      <div>
+        <h2 id="authTitle">Welcome back</h2>
+        <p>Sign in to book, review and manage expert profiles.</p>
+      </div>
+      <button class="icon-btn" data-close aria-label="Close">✕</button>
+    </div>
+    <div class="tabs" role="tablist">
+      <button class="tab active" id="tabLogin" role="tab">Sign in</button>
+      <button class="tab" id="tabRegister" role="tab">Create account</button>
+    </div>
+
+    <form class="form-grid" id="loginForm">
+      <div class="form-field">
+        <label for="loginEmail">Email</label>
+        <input id="loginEmail" type="email" autocomplete="email" required placeholder="you@example.com" />
+      </div>
+      <div class="form-field">
+        <label for="loginPassword">Password</label>
+        <input id="loginPassword" type="password" autocomplete="current-password" required placeholder="••••••••" />
+      </div>
+      <p class="form-error hidden" id="loginError"></p>
+      <div class="modal-actions">
+        <button class="btn primary" type="submit">Sign in</button>
+        <button class="btn secondary" type="button" id="demoLoginBtn">Use demo account</button>
+      </div>
+      <p class="form-note">Demo credentials: <b>demo@guideme.ai</b> / <b>demo12345</b></p>
+    </form>
+
+    <form class="form-grid hidden" id="registerForm">
+      <div class="form-field">
+        <label for="registerName">Full name</label>
+        <input id="registerName" required placeholder="Your name" />
+      </div>
+      <div class="form-field">
+        <label for="registerEmail">Email</label>
+        <input id="registerEmail" type="email" autocomplete="email" required placeholder="you@example.com" />
+      </div>
+      <div class="form-field">
+        <label for="registerPassword">Password</label>
+        <input id="registerPassword" type="password" autocomplete="new-password" required minlength="8" placeholder="At least 8 characters" />
+      </div>
+      <p class="form-error hidden" id="registerError"></p>
+      <div class="modal-actions">
+        <button class="btn primary" type="submit">Create account</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Booking modal -->
+<div class="modal" id="bookingModal" role="dialog" aria-modal="true" aria-labelledby="bookingTitle">
+  <div class="modal-card">
+    <div class="modal-head">
+      <div>
+        <h2 id="bookingTitle">Book a session</h2>
+        <p id="bookingSubtitle"></p>
+      </div>
+      <button class="icon-btn" data-close aria-label="Close">✕</button>
+    </div>
+    <form class="form-grid" id="bookingForm">
+      <input type="hidden" id="bookExpertId" />
+      <div class="form-grid two">
+        <div class="form-field">
+          <label for="bookUserName">Your name</label>
+          <input id="bookUserName" required placeholder="Your name" />
+        </div>
+        <div class="form-field">
+          <label for="bookContact">Phone or email</label>
+          <input id="bookContact" required placeholder="How should they reach you?" />
+        </div>
+      </div>
+      <div class="form-field">
+        <label for="bookProblem">What do you need help with?</label>
+        <textarea id="bookProblem" required placeholder="A short description helps the expert prepare."></textarea>
+      </div>
+      <div class="form-grid two">
+        <div class="form-field">
+          <label for="bookMethod">Communication</label>
+          <select id="bookMethod" required>
+            <option value="">Select method</option>
+            <option>Chat</option>
+            <option>Call</option>
+            <option>Video Call</option>
+            <option>In Person</option>
+          </select>
+        </div>
+        <div class="form-field">
+          <label for="bookUrgency">Urgency</label>
+          <select id="bookUrgency" required>
+            <option value="">Select urgency</option>
+            <option>Low</option>
+            <option>Medium</option>
+            <option>High</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-field">
+        <label for="bookWhen">Preferred date &amp; time (optional)</label>
+        <input id="bookWhen" type="datetime-local" />
+      </div>
+      <p class="form-error hidden" id="bookingError"></p>
+      <div class="modal-actions">
+        <button class="btn primary" type="submit" id="bookingSubmit">Request booking</button>
+        <button class="btn secondary" type="button" data-close>Cancel</button>
+      </div>
+    </form>
+    <div class="hidden" id="bookingSuccess">
+      <div class="review-summary" style="display:block;text-align:center">
+        <div style="font-size:2rem">✅</div>
+        <h3 style="margin:6px 0 4px">Booking requested</h3>
+        <p style="margin:0;color:var(--muted);font-size:0.86rem">Your reference is</p>
+        <p class="ref" id="bookingReference" style="display:inline-block;margin-top:6px;font-size:0.9rem"></p>
+      </div>
+      <div class="modal-actions">
+        <button class="btn primary" type="button" data-close>Done</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Reviews modal -->
+<div class="modal" id="reviewsModal" role="dialog" aria-modal="true" aria-labelledby="reviewsTitle">
+  <div class="modal-card wide">
+    <div class="modal-head">
+      <div>
+        <h2 id="reviewsTitle">Reviews</h2>
+        <p id="reviewsSubtitle"></p>
+      </div>
+      <button class="icon-btn" data-close aria-label="Close">✕</button>
+    </div>
+    <div class="review-summary">
+      <div style="text-align:center">
+        <div class="big-rating" id="reviewAverage">—</div>
+        <div class="stars" id="reviewStars">☆☆☆☆☆</div>
+        <small style="color:var(--muted)" id="reviewCount">0 reviews</small>
+      </div>
+      <div class="dist" id="reviewDistribution"></div>
+    </div>
+    <div class="review-list" id="reviewList"></div>
+
+    <form class="form-grid" id="reviewForm" style="border-top:1px solid var(--line);padding-top:14px;margin-top:14px">
+      <input type="hidden" id="reviewExpertId" />
+      <div class="form-grid two">
+        <div class="form-field">
+          <label for="reviewUserName">Your name</label>
+          <input id="reviewUserName" required placeholder="Your name" />
+        </div>
+        <div class="form-field">
+          <label>Rating</label>
+          <div class="star-picker" id="starPicker" role="radiogroup" aria-label="Rating">
+            <button type="button" data-star="1" aria-label="1 star">★</button>
+            <button type="button" data-star="2" aria-label="2 stars">★</button>
+            <button type="button" data-star="3" aria-label="3 stars">★</button>
+            <button type="button" data-star="4" aria-label="4 stars">★</button>
+            <button type="button" data-star="5" aria-label="5 stars">★</button>
+          </div>
+        </div>
+      </div>
+      <div class="form-field">
+        <label for="reviewComment">Comment</label>
+        <textarea id="reviewComment" placeholder="What was helpful?"></textarea>
+      </div>
+      <p class="form-error hidden" id="reviewError"></p>
+      <div class="modal-actions">
+        <button class="btn primary" type="submit">Submit review</button>
+        <button class="btn secondary" type="button" data-close>Close</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Expert registration modal -->
+<div class="modal" id="expertModal" role="dialog" aria-modal="true" aria-labelledby="expertTitle">
+  <div class="modal-card wide">
+    <div class="modal-head">
+      <div>
+        <h2 id="expertTitle">Become an expert</h2>
+        <p>Publish a profile so users can find and book you.</p>
+      </div>
+      <button class="icon-btn" data-close aria-label="Close">✕</button>
+    </div>
+    <form class="form-grid" id="expertForm">
+      <div class="form-grid two">
+        <div class="form-field">
+          <label for="expertName">Full name</label>
+          <input id="expertName" required placeholder="Your name" />
+        </div>
+        <div class="form-field">
+          <label for="expertProfession">Profession</label>
+          <input id="expertProfession" required placeholder="e.g. Career Coach" />
+        </div>
+      </div>
+      <div class="form-grid two">
+        <div class="form-field">
+          <label for="expertCategory">Category</label>
+          <select id="expertCategory">
+            <option value="">Auto-detect</option>
+            <option>Health</option><option>Career</option><option>Fitness</option><option>Beauty</option>
+            <option>Education</option><option>Finance</option><option>Legal</option><option>Technology</option>
+            <option>Wellness</option><option>Other</option>
+          </select>
+        </div>
+        <div class="form-field">
+          <label for="expertExperience">Years of experience</label>
+          <input id="expertExperience" type="number" min="0" required placeholder="5" />
+        </div>
+      </div>
+      <div class="form-grid two">
+        <div class="form-field">
+          <label for="expertPhone">Phone</label>
+          <input id="expertPhone" required placeholder="+91…" />
+        </div>
+        <div class="form-field">
+          <label for="expertEmail">Email</label>
+          <input id="expertEmail" type="email" required placeholder="you@example.com" />
+        </div>
+      </div>
+      <div class="form-grid two">
+        <div class="form-field">
+          <label for="expertLanguages">Languages</label>
+          <input id="expertLanguages" required placeholder="English, Hindi" />
+        </div>
+        <div class="form-field">
+          <label for="expertRate">Rate per session (₹)</label>
+          <input id="expertRate" type="number" min="0" placeholder="500" />
+        </div>
+      </div>
+      <div class="form-field">
+        <label for="expertAvailability">Availability</label>
+        <input id="expertAvailability" placeholder="e.g. Mon–Fri, 5–8 PM" />
+      </div>
+      <div class="form-field">
+        <label for="expertBio">Short bio</label>
+        <textarea id="expertBio" placeholder="What do you help people with?"></textarea>
+      </div>
+      <p class="form-error hidden" id="expertError"></p>
+      <div class="modal-actions">
+        <button class="btn primary" type="submit">Publish profile</button>
+        <button class="btn secondary" type="button" data-close>Cancel</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<div id="toasts" aria-live="polite"></div>
+
+<script src="./config.js"></script>
+<script>
+(() => {
+  "use strict";
+
+  /* ------------------------------------------------------------------ */
+  /* Config & state                                                      */
+  /* ------------------------------------------------------------------ */
+  const DEFAULT_API = "http://127.0.0.1:8000";
+  const API_BASE = (
+    window.GM_API_BASE ||
+    localStorage.getItem("gm_api") ||
+    DEFAULT_API
+  ).replace(/\/+$/, "");
+  const TOKEN_KEY = "gm_token";
+  const USER_KEY = "gm_user";
+
+  const CATEGORIES = [
+    { name: "Health", emoji: "🏥", blurb: "Doctors, therapists, skin & sleep" },
+    { name: "Career", emoji: "🎓", blurb: "Resume, interviews, promotions" },
+    { name: "Fitness", emoji: "💪", blurb: "Training, nutrition, recovery" },
+    { name: "Beauty", emoji: "💅", blurb: "Hair, styling, grooming" },
+    { name: "Education", emoji: "📚", blurb: "Exams, courses, admissions" },
+    { name: "Finance", emoji: "💰", blurb: "Budgeting, investing, tax" },
+    { name: "Legal", emoji: "⚖️", blurb: "Contracts, rights, disputes" },
+    { name: "Technology", emoji: "💻", blurb: "Code, careers, projects" },
+    { name: "Wellness", emoji: "🧘", blurb: "Burnout, habits, relationships" },
+    { name: "Other", emoji: "✨", blurb: "Everything else" }
+  ];
+
+  const EXAMPLES = [
+    "I feel burnt out at work and can't switch off",
+    "Help me prepare for a job interview",
+    "My skin keeps breaking out — what routine should I follow?",
+    "I want a beginner workout plan",
+    "How should I start investing on a small salary?"
+  ];
+
+  const state = {
+    token: localStorage.getItem(TOKEN_KEY) || "",
+    user: JSON.parse(localStorage.getItem(USER_KEY) || "null"),
+    experts: [],
+    resultExperts: [],
+    assistantResults: [],
+    categories: {},
+    analytics: null,
+    rating: 0,
+    activeExpert: null
+  };
+
+  const $ = (selector, root = document) => root.querySelector(selector);
+  const $$ = (selector, root = document) => Array.from(root.querySelectorAll(selector));
+
+  /* ------------------------------------------------------------------ */
+  /* Utilities                                                           */
+  /* ------------------------------------------------------------------ */
+  function esc(value) {
+    return String(value == null ? "" : value)
+      .replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;").replace(/'/g, "&#39;");
+  }
+
+  function initials(name) {
+    return (String(name || "?").trim().split(/\s+/).slice(0, 2)
+      .map(part => part[0] || "").join("") || "?").toUpperCase();
+  }
+
+  const GRADIENTS = [
+    ["#6366f1", "#8b5cf6"], ["#0ea5e9", "#2563eb"], ["#f43f5e", "#ec4899"],
+    ["#10b981", "#059669"], ["#f59e0b", "#ea580c"], ["#14b8a6", "#0d9488"],
+    ["#8b5cf6", "#d946ef"], ["#3b82f6", "#06b6d4"]
+  ];
+  function gradientFor(name) {
+    const text = String(name || "");
+    let hash = 0;
+    for (let i = 0; i < text.length; i++) hash = (hash * 31 + text.charCodeAt(i)) >>> 0;
+    const [a, b] = GRADIENTS[hash % GRADIENTS.length];
+    return `linear-gradient(135deg, ${a}, ${b})`;
+  }
+
+  function stars(rating) {
+    if (!rating) return "☆☆☆☆☆";
+    const full = Math.round(rating);
+    return "★".repeat(full) + "☆".repeat(5 - full);
+  }
+
+  function money(value) {
+    const amount = Number(value || 0);
+    return amount > 0 ? `₹${amount.toLocaleString("en-IN")}` : "Rate on request";
+  }
+
+  function isoToLocalInput(iso) {
+    if (!iso) return "";
+    const date = new Date(iso);
+    if (Number.isNaN(date.getTime())) return "";
+    const pad = n => String(n).padStart(2, "0");
+    return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}T${pad(date.getHours())}:${pad(date.getMinutes())}`;
+  }
+
+  function toast(message, type = "info") {    const node = document.createElement("div");
+    node.className = `toast ${type}`;
+    node.textContent = message;
+    $("#toasts").appendChild(node);
+    setTimeout(() => {
+      node.style.opacity = "0";
+      node.style.transition = "opacity .25s ease";
+      setTimeout(() => node.remove(), 260);
+    }, 3800);
+  }
+
+  async function api(path, options = {}) {
+    const headers = { "Content-Type": "application/json" };
+    if (state.token) headers.Authorization = `Bearer ${state.token}`;
+    let response;
+    try {
+      response = await fetch(`${API_BASE}${path}`, {
+        method: options.method || "GET",
+        headers,
+        body: options.body === undefined ? undefined : JSON.stringify(options.body)
+      });
+    } catch (error) {
+      throw new Error(`Cannot reach the API at ${API_BASE}. Is the Django server running?`);
+    }
+    let data = null;
+    try { data = await response.json(); } catch (_) { /* no body */ }
+    if (!response.ok) {
+      throw new Error((data && (data.error || data.detail)) || `Request failed (${response.status})`);
+    }
+    return data;
+  }
+
+  function findExpert(id) {
+    const pools = [state.experts, state.resultExperts, state.assistantResults];
+    for (const pool of pools) {
+      if (!Array.isArray(pool)) continue;
+      const found = pool.find(item => Number(item.id) === Number(id));
+      if (found) return found;
+    }
+    return null;
+  }
+
+  function openModal(id) {
+    const modal = document.getElementById(id);
+    if (!modal) return;
+    modal.classList.add("open");
+    document.body.classList.add("no-scroll");
+    const focusable = modal.querySelector("input, select, textarea, button");
+    if (focusable) setTimeout(() => focusable.focus(), 40);
+  }
+
+  function closeModal(modal) {
+    (modal || $(".modal.open"))?.classList.remove("open");
+    if (!document.querySelector(".modal.open")) document.body.classList.remove("no-scroll");
+  }
+
+  /* ------------------------------------------------------------------ */
+  /* Auth                                                                */
+  /* ------------------------------------------------------------------ */
+  function setAuth(token, user) {
+    state.token = token || "";
+    state.user = user || null;
+    if (token) localStorage.setItem(TOKEN_KEY, token); else localStorage.removeItem(TOKEN_KEY);
+    if (user) localStorage.setItem(USER_KEY, JSON.stringify(user)); else localStorage.removeItem(USER_KEY);
+    renderAuth();
+  }
+
+  function renderAuth() {
+    const authBtn = $("#authBtn");
+    const logoutBtn = $("#logoutBtn");
+    if (state.user) {
+      authBtn.textContent = state.user.name || "Account";
+      authBtn.title = state.user.email || "";
+      authBtn.classList.remove("hidden");
+      logoutBtn.classList.remove("hidden");
+    } else {
+      authBtn.textContent = "Sign in";
+      authBtn.title = "";
+      authBtn.classList.remove("hidden");
+      logoutBtn.classList.add("hidden");
+    }
+  }
+
+  async function validateSession() {
+    if (!state.token) return;
+    try {
+      const data = await api("/api/auth/me/");
+      setAuth(state.token, data.user);
+    } catch (_) {
+      setAuth("", null);
+    }
+  }
+
+  $("#authBtn").addEventListener("click", () => {
+    if (state.user) {
+      $("#bookingHint").textContent = `Signed in as ${state.user.name} (${state.user.email}).`;
+      location.hash = "#bookings";
+      loadBookings();
+      return;
+    }
+    openModal("authModal");
+  });
+
+  $("#logoutBtn").addEventListener("click", async () => {
+    try { await api("/api/auth/logout/", { method: "POST" }); } catch (_) {}
+    setAuth("", null);
+    toast("Signed out", "success");
+    loadExperts();
+    renderBookings([]);
+    $("#bookingHint").textContent = "Sign in to track your consultation requests.";
+  });
+
+  $("#tabLogin").addEventListener("click", () => switchAuthTab("login"));
+  $("#tabRegister").addEventListener("click", () => switchAuthTab("register"));
+
+  function switchAuthTab(tab) {
+    const isLogin = tab === "login";
+    $("#tabLogin").classList.toggle("active", isLogin);
+    $("#tabRegister").classList.toggle("active", !isLogin);
+    $("#loginForm").classList.toggle("hidden", !isLogin);
+    $("#registerForm").classList.toggle("hidden", isLogin);
+    $("#authTitle").textContent = isLogin ? "Welcome back" : "Create your account";
+  }
+
+  $("#loginForm").addEventListener("submit", async event => {
+    event.preventDefault();
+    const button = event.submitter || $("#loginForm button[type=submit]");
+    const errorBox = $("#loginError");
+    errorBox.classList.add("hidden");
+    button.disabled = true;
+    try {
+      const data = await api("/api/auth/login/", {
+        method: "POST",
+        body: { email: $("#loginEmail").value.trim(), password: $("#loginPassword").value }
+      });
+      setAuth(data.token, data.user);
+      closeModal($("#authModal"));
+      toast(`Welcome back, ${data.user.name}!`, "success");
+      $("#loginForm").reset();
+      loadExperts();
+      loadBookings();
+    } catch (error) {
+      errorBox.textContent = error.message;
+      errorBox.classList.remove("hidden");
+    } finally {
+      button.disabled = false;
+    }
+  });
+
+  $("#demoLoginBtn").addEventListener("click", () => {
+    $("#loginEmail").value = "demo@guideme.ai";
+    $("#loginPassword").value = "demo12345";
+    $("#loginForm").requestSubmit();
+  });
+
+  $("#registerForm").addEventListener("submit", async event => {
+    event.preventDefault();
+    const button = event.submitter || $("#registerForm button[type=submit]");
+    const errorBox = $("#registerError");
+    errorBox.classList.add("hidden");
+    button.disabled = true;
+    try {
+      const data = await api("/api/auth/register/", {
+        method: "POST",
+        body: {
+          name: $("#registerName").value.trim(),
+          email: $("#registerEmail").value.trim(),
+          password: $("#registerPassword").value
+        }
+      });
+      setAuth(data.token, data.user);
+      closeModal($("#authModal"));
+      toast("Account created — you're signed in.", "success");
+      $("#registerForm").reset();
+      loadExperts();
+      loadBookings();
+    } catch (error) {
+      errorBox.textContent = error.message;
+      errorBox.classList.remove("hidden");
+    } finally {
+      button.disabled = false;
+    }
+  });
+
+  /* ------------------------------------------------------------------ */
+  /* Experts                                                             */
+  /* ------------------------------------------------------------------ */
+  async function loadExperts() {
+    const params = new URLSearchParams();
+    const search = $("#searchInput").value.trim();
+    const category = $("#categoryFilter").value;
+    const sort = $("#sortSelect").value;
+    if (search) params.set("q", search);
+    if (category && category !== "All") params.set("category", category);
+    if (sort) params.set("sort", sort);
+
+    try {
+      const data = await api(`/api/experts/?${params.toString()}`);
+      state.experts = data.experts || [];
+      state.categories = Object.fromEntries((data.categories || []).map(item => [item.category, item.count]));
+      renderExperts(state.experts);
+      renderCategories();
+      renderHeroStats();
+    } catch (error) {
+      toast(error.message, "error");
+      $("#expertsCount").textContent = "Could not load experts.";
+      $("#aiModeBadge").innerHTML = `<span class="dot" style="background:#dc2626"></span> offline`;
+    }
+  }
+
+  function expertCard(expert, options = {}) {
+    const score = options.score;
+    const reason = options.reason;
+    const showManage = expert.can_manage;
+    const rating = expert.rating;
+    return `
+      <article class="expert-card">
+        ${score !== undefined && score !== null ? `
+          <div class="score-wrap" title="AI match score">
+            <div class="score-ring" style="--p:${Math.max(0, Math.min(100, score))}"><span>${score}%</span></div>
+          </div>` : ""}
+        <div class="card-top">
+          <div class="avatar" style="background:${gradientFor(expert.name)}">${esc(initials(expert.name))}</div>
+          <div class="card-id">
+            <h3>${esc(expert.name)}</h3>
+            <p class="prof">${esc(expert.profession)}</p>
+          </div>
+        </div>
+        <span class="cat-tag">${esc(expert.category || "Other")}</span>
+        <div class="rating-row">
+          <span class="stars">${stars(rating)}</span>
+          <span>${rating ? `${rating}/5` : "New"}</span>
+          <span>·</span>
+          <span>${expert.review_count || 0} review${expert.review_count === 1 ? "" : "s"}</span>
+        </div>
+        <p class="bio">${esc(expert.bio || "No bio added yet.")}</p>
+        <div class="meta-list">
+          <span class="meta-item">${expert.experience} yrs exp</span>
+          <span class="meta-item">${esc(expert.languages)}</span>
+          <span class="meta-item">${money(expert.hourly_rate)}</span>
+          <span class="meta-item">${esc(expert.availability || "Available on request")}</span>
+        </div>
+        ${reason ? `<div class="match-reason"><b>Why:</b> ${esc(reason)}</div>` : ""}
+        <div class="card-actions">
+          <button class="btn primary small" data-action="book" data-id="${expert.id}" data-name="${esc(expert.name)}">Book</button>
+          <button class="btn secondary small" data-action="reviews" data-id="${expert.id}" data-name="${esc(expert.name)}">Reviews</button>
+          ${showManage ? `<button class="btn danger small" data-action="delete" data-id="${expert.id}" data-name="${esc(expert.name)}" title="Delete profile">Delete</button>` : ""}
+        </div>
+      </article>`;
+  }
+
+  function renderExperts(experts) {
+    const grid = $("#expertsGrid");
+    grid.innerHTML = experts.map(expert => expertCard(expert)).join("");
+    $("#expertsEmpty").classList.toggle("hidden", experts.length > 0);
+    $("#expertsCount").textContent = `${experts.length} expert${experts.length === 1 ? "" : "s"} available · click Reviews to read or leave feedback`;
+  }
+
+  function renderCategories() {
+    $("#categoryGrid").innerHTML = CATEGORIES.map(category => {
+      const count = state.categories[category.name] || 0;
+      return `
+        <button class="category-card" data-category="${category.name}">
+          <div class="emoji" aria-hidden="true">${category.emoji}</div>
+          <h3>${category.name}</h3>
+          <p>${category.blurb}</p>
+          <div class="count">${count} expert${count === 1 ? "" : "s"}</div>
+        </button>`;
+    }).join("");
+
+    const select = $("#categoryFilter");
+    const current = select.value;
+    select.innerHTML = `<option value="All">All categories</option>` +
+      CATEGORIES.map(category => `<option value="${category.name}">${category.name}</option>`).join("");
+    select.value = current || "All";
+  }
+
+  function renderHeroStats() {
+    const totalReviews = state.experts.reduce((sum, expert) => sum + (expert.review_count || 0), 0);
+    const rated = state.experts.filter(expert => expert.rating);
+    const average = rated.length ? (rated.reduce((sum, expert) => sum + expert.rating, 0) / rated.length).toFixed(1) : "—";
+    $("#heroStats").innerHTML = `
+      <div><b>${state.experts.length}</b> expert profiles</div>
+      <div><b>${Object.keys(state.categories).length}</b> categories</div>
+      <div><b>${average}</b> average rating</div>
+      <div><b>${totalReviews}</b> community reviews</div>`;
+  }
+
+  /* ------------------------------------------------------------------ */
+  /* AI recommendations                                                  */
+  /* ------------------------------------------------------------------ */
+  async function askAI(question) {
+    const text = (question || $("#question").value).trim();
+    if (!text) {
+      toast("Tell us what you need help with first.", "error");
+      $("#question").focus();
+      return;
+    }
+    if (question) $("#question").value = question;
+
+    const button = $("#askBtn");
+    button.disabled = true;
+    button.textContent = "Matching…";
+    try {
+      const category = $("#categoryFilter").value;
+      const data = await api("/api/recommend/", {
+        method: "POST",
+        body: { question: text, category: category === "All" ? null : category, limit: 6 }
+      });
+      renderResults(data);
+      document.getElementById("results").scrollIntoView({ behavior: "smooth", block: "start" });
+    } catch (error) {
+      toast(error.message, "error");
+    } finally {
+      button.disabled = false;
+      button.textContent = "Get AI matches →";
+    }
+  }
+
+  function renderResults(data) {
+    const experts = data.experts || [];
+    const meta = data.meta || {};
+    state.resultExperts = experts;
+    $("#results").classList.remove("hidden");
+    $("#resultQuery").textContent = `Results for “${meta.query || ""}”`;
+    $("#resultMeta").textContent = `${meta.count || experts.length} match${experts.length === 1 ? "" : "es"} · ${meta.detected_category || "general"} · ${meta.ai_mode || "hybrid"}`;
+    $("#resultsGrid").innerHTML = experts.length
+      ? experts.map(expert => expertCard(expert, { score: expert.match_score, reason: expert.match_reason })).join("")
+      : `<p class="empty">No matches found. Try describing the problem differently.</p>`;
+  }
+
+  $("#askBtn").addEventListener("click", () => askAI());
+  $("#question").addEventListener("keydown", event => {
+    if ((event.metaKey || event.ctrlKey) && event.key === "Enter") askAI();
+  });
+
+  $("#exampleChips").innerHTML = EXAMPLES.slice(0, 4)
+    .map(text => `<button class="chip" type="button" data-example="${esc(text)}">${esc(text)}</button>`)
+    .join("");
+
+  document.addEventListener("click", event => {
+    const example = event.target.closest("[data-example]");
+    if (example) {
+      $("#question").value = example.dataset.example;
+      $("#question").focus();
+      return;
+    }
+
+    const categoryCard = event.target.closest("[data-category]");
+    if (categoryCard) {
+      $("#categoryFilter").value = categoryCard.dataset.category;
+      loadExperts();
+      document.getElementById("experts").scrollIntoView({ behavior: "smooth" });
+      return;
+    }
+
+    const action = event.target.closest("[data-action]");
+    if (action) {
+      const id = Number(action.dataset.id);
+      const expert = findExpert(id) || { id, name: action.dataset.name || "Expert" };
+      if (action.dataset.action === "book") {
+        openBooking(expert);
+      } else if (action.dataset.action === "reviews") {
+        openReviews(id, expert.name);
+      } else if (action.dataset.action === "delete") {
+        deleteExpert(id, expert.name);
+      }
+      return;
+    }
+  });
+
+  /* ------------------------------------------------------------------ */
+  /* Booking                                                             */
+  /* ------------------------------------------------------------------ */
+  function openBooking(expert) {
+    state.activeExpert = expert;
+    $("#bookingForm").classList.remove("hidden");
+    $("#bookingSuccess").classList.add("hidden");
+    $("#bookingError").classList.add("hidden");
+    $("#bookExpertId").value = expert.id ?? "";
+    $("#bookingSubtitle").textContent = expert.name ? `with ${expert.name}${expert.profession ? ` · ${expert.profession}` : ""}` : "";
+    if (state.user) {
+      $("#bookUserName").value = state.user.name || "";
+      $("#bookContact").value = state.user.email || "";
+    }
+    const when = $("#bookWhen");
+    const now = new Date();
+    now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
+    when.min = now.toISOString().slice(0, 16);
+    if (!when.value) when.value = isoToLocalInput(new Date(Date.now() + 86400000).toISOString());
+    openModal("bookingModal");
+  }
+
+  $("#bookingForm").addEventListener("submit", async event => {
+    event.preventDefault();
+    const button = $("#bookingSubmit");
+    const errorBox = $("#bookingError");
+    errorBox.classList.add("hidden");
+    button.disabled = true;
+
+    const expert = state.activeExpert || {};
+    const when = $("#bookWhen").value;
+    try {
+      const data = await api("/api/bookings/", {
+        method: "POST",
+        body: {
+          expertName: expert.name || "Expert",
+          expert_id: expert.id ?? null,
+          userName: $("#bookUserName").value.trim(),
+          contact: $("#bookContact").value.trim(),
+          problem: $("#bookProblem").value.trim(),
+          method: $("#bookMethod").value,
+          urgency: $("#bookUrgency").value,
+          scheduled_at: when ? new Date(when).toISOString() : null
+        }
+      });
+      $("#bookingForm").classList.add("hidden");
+      $("#bookingSuccess").classList.remove("hidden");
+      $("#bookingReference").textContent = data.booking.reference;
+      toast("Booking requested — reference " + data.booking.reference, "success");
+      if (state.user) loadBookings();
+    } catch (error) {
+      errorBox.textContent = error.message;
+      errorBox.classList.remove("hidden");
+    } finally {
+      button.disabled = false;
+    }
+  });
+
+  $("#bookingModal").addEventListener("transitionend", () => {});
+  $("#bookingModal").addEventListener("click", event => {
+    if (event.target.id === "bookingModal") closeModal(event.target);
+  });
+
+  /* ------------------------------------------------------------------ */
+  /* Reviews                                                             */
+  /* ------------------------------------------------------------------ */
+  async function openReviews(id, name) {
+    state.activeExpert = state.experts.find(item => Number(item.id) === Number(id)) || state.activeExpert;
+    $("#reviewExpertId").value = id;
+    $("#reviewUserName").value = state.user?.name || "";
+    $("#reviewsTitle").textContent = name ? `Reviews · ${name}` : "Reviews";
+    $("#reviewError").classList.add("hidden");
+    $("#reviewComment").value = "";
+    setStarRating(0);
+    openModal("reviewsModal");
+    await loadReviews(id);
+  }
+
+  async function loadReviews(id) {
+    $("#reviewList").innerHTML = `<p class="typing">Loading reviews…</p>`;
+    try {
+      const data = await api(`/api/experts/${id}/reviews/`);
+      $("#reviewAverage").textContent = data.rating ? data.rating.toFixed(1) : "—";
+      $("#reviewStars").textContent = stars(data.rating);
+      $("#reviewCount").textContent = `${data.review_count || 0} review${data.review_count === 1 ? "" : "s"}`;
+      $("#reviewsSubtitle").textContent = data.rating ? `Rated ${data.rating}/5 by the community` : "Be the first to review";
+
+      const total = Math.max(1, data.review_count || 0);
+      $("#reviewDistribution").innerHTML = [5, 4, 3, 2, 1].map(star => {
+        const count = data.distribution?.[star] || 0;
+        return `<div class="dist-row">
+          <span>${star}★</span>
+          <div class="dist-track"><div class="dist-fill" style="width:${Math.round((count / total) * 100)}%"></div></div>
+          <span>${count}</span>
+        </div>`;
+      }).join("");
+
+      $("#reviewList").innerHTML = (data.reviews || []).length
+        ? data.reviews.map(review => `
+            <div class="review">
+              <div class="review-head">
+                <b>${esc(review.user_name)}</b>
+                <span class="stars">${stars(review.rating)}</span>
+              </div>
+              <p>${esc(review.comment || "No comment left.")}</p>
+            </div>`).join("")
+        : `<p class="typing">No reviews yet — add the first one below.</p>`;
+    } catch (error) {
+      $("#reviewList").innerHTML = `<p class="form-error">${esc(error.message)}</p>`;
+    }
+  }
+
+  function setStarRating(value) {
+    state.rating = value;
+    $$("#starPicker button").forEach(button => {
+      button.classList.toggle("on", Number(button.dataset.star) <= value);
+      button.setAttribute("aria-checked", String(Number(button.dataset.star) === value));
+    });
+  }
+
+  $("#starPicker").addEventListener("click", event => {
+    const button = event.target.closest("button[data-star]");
+    if (button) setStarRating(Number(button.dataset.star));
+  });
+
+  $("#reviewForm").addEventListener("submit", async event => {
+    event.preventDefault();
+    const errorBox = $("#reviewError");
+    errorBox.classList.add("hidden");
+    if (!state.rating) {
+      errorBox.textContent = "Pick a star rating first.";
+      errorBox.classList.remove("hidden");
+      return;
+    }
+    try {
+      await api(`/api/experts/${$("#reviewExpertId").value}/reviews/`, {
+        method: "POST",
+        body: {
+          user_name: $("#reviewUserName").value.trim(),
+          rating: state.rating,
+          comment: $("#reviewComment").value.trim()
+        }
+      });
+      toast("Review submitted — thank you!", "success");
+      $("#reviewComment").value = "";
+      setStarRating(0);
+      await loadReviews($("#reviewExpertId").value);
+      loadExperts();
+    } catch (error) {
+      errorBox.textContent = error.message;
+      errorBox.classList.remove("hidden");
+    }
+  });
+
+  /* ------------------------------------------------------------------ */
+  /* Manage experts                                                      */
+  /* ------------------------------------------------------------------ */
+  async function deleteExpert(id, name) {
+    if (!state.user) {
+      toast("Sign in to manage expert profiles.", "error");
+      openModal("authModal");
+      return;
+    }
+    if (!confirm(`Delete ${name || "this expert"}? This cannot be undone.`)) return;
+    try {
+      await api(`/api/experts/${id}/`, { method: "DELETE" });
+      toast("Expert deleted.", "success");
+      loadExperts();
+      loadAnalytics();
+    } catch (error) {
+      toast(error.message, "error");
+    }
+  }
+
+  $("#becomeExpertBtn").addEventListener("click", () => {
+    if (!state.user) {
+      toast("Create an account or sign in first.", "error");
+      openModal("authModal");
+      return;
+    }
+    $("#expertError").classList.add("hidden");
+    $("#expertForm").reset();
+    if (state.user) {
+      $("#expertName").value = state.user.name || "";
+      $("#expertEmail").value = state.user.email || "";
+    }
+    openModal("expertModal");
+  });
+
+  $("#expertForm").addEventListener("submit", async event => {
+    event.preventDefault();
+    const button = event.submitter || $("#expertForm button[type=submit]");
+    const errorBox = $("#expertError");
+    errorBox.classList.add("hidden");
+    button.disabled = true;
+    try {
+      await api("/api/experts/", {
+        method: "POST",
+        body: {
+          name: $("#expertName").value.trim(),
+          profession: $("#expertProfession").value.trim(),
+          category: $("#expertCategory").value,
+          experience: Number($("#expertExperience").value || 0),
+          phone: $("#expertPhone").value.trim(),
+          email: $("#expertEmail").value.trim(),
+          languages: $("#expertLanguages").value.trim(),
+          hourly_rate: Number($("#expertRate").value || 0),
+          availability: $("#expertAvailability").value.trim(),
+          bio: $("#expertBio").value.trim()
+        }
+      });
+      closeModal($("#expertModal"));
+      toast("Profile published!", "success");
+      $("#expertForm").reset();
+      loadExperts();
+      loadAnalytics();
+    } catch (error) {
+      errorBox.textContent = error.message;
+      errorBox.classList.remove("hidden");
+    } finally {
+      button.disabled = false;
+    }
+  });
+
+  /* ------------------------------------------------------------------ */
+  /* Bookings                                                            */
+  /* ------------------------------------------------------------------ */
+  async function loadBookings() {
+    if (!state.user) {
+      renderBookings([]);
+      return;
+    }
+    $("#bookingsList").innerHTML = `<p class="typing">Loading bookings…</p>`;
+    try {
+      const data = await api("/api/bookings/");
+      renderBookings(data.bookings || []);
+    } catch (error) {
+      $("#bookingsList").innerHTML = `<p class="empty">${esc(error.message)}</p>`;
+    }
+  }
+
+  function renderBookings(bookings) {
+    const list = $("#bookingsList");
+    if (!state.user) {
+      list.innerHTML = `<p class="empty">Sign in to see and manage your bookings.</p>`;
+      $("#bookingHint").textContent = "Sign in to track your consultation requests.";
+      return;
+    }
+    if (!bookings.length) {
+      list.innerHTML = `<p class="empty">No bookings yet — pick an expert above to get started.</p>`;
+      $("#bookingHint").textContent = `Signed in as ${state.user.name}.`;
+      return;
+    }
+    $("#bookingHint").textContent = `Signed in as ${state.user.name} · ${bookings.length} booking${bookings.length === 1 ? "" : "s"}`;
+    list.innerHTML = bookings.map(booking => {
+      const when = booking.scheduled_at ? new Date(booking.scheduled_at).toLocaleString() : "Flexible";
+      const canCancel = ["pending", "confirmed"].includes(booking.status);
+      const canAdvance = state.user.is_staff && booking.status !== "completed" && booking.status !== "cancelled";
+      return `
+        <div class="booking" data-booking="${booking.id}">
+          <div class="booking-main">
+            <h4>${esc(booking.expertName)} <span class="ref">${esc(booking.reference || "")}</span></h4>
+            <p>${esc(booking.method)} · ${esc(booking.urgency)} urgency · ${esc(when)}</p>
+            <p>${esc(booking.problem)}</p>
+          </div>
+          <div class="booking-side">
+            <span class="status ${esc(booking.status)}">${esc(booking.status)}</span>
+            ${canAdvance ? `<button class="btn secondary small" data-booking-action="advance" data-id="${booking.id}" data-status="${booking.status === "pending" ? "confirmed" : "completed"}">${booking.status === "pending" ? "Confirm" : "Complete"}</button>` : ""}
+            ${canCancel ? `<button class="btn danger small" data-booking-action="cancel" data-id="${booking.id}">Cancel</button>` : ""}
+          </div>
+        </div>`;
+    }).join("");
+  }
+
+  $("#bookingsList").addEventListener("click", async event => {
+    const button = event.target.closest("[data-booking-action]");
+    if (!button) return;
+    const status = button.dataset.bookingAction === "cancel" ? "cancelled" : button.dataset.status;
+    try {
+      await api(`/api/bookings/${button.dataset.id}/`, { method: "PATCH", body: { status } });
+      toast(`Booking ${status}.`, "success");
+      loadBookings();
+      loadAnalytics();
+    } catch (error) {
+      toast(error.message, "error");
+    }
+  });
+
+  $("#refreshBookings").addEventListener("click", loadBookings);
+
+  /* ------------------------------------------------------------------ */
+  /* Analytics                                                           */
+  /* ------------------------------------------------------------------ */
+  async function loadAnalytics() {
+    try {
+      const data = await api("/api/analytics/");
+      state.analytics = data;
+      renderAnalytics(data);
+    } catch (error) {
+      $("#statCards").innerHTML = `<p class="empty">${esc(error.message)}</p>`;
+    }
+  }
+
+  function renderAnalytics(data) {
+    const totals = data.totals || {};
+    $("#statCards").innerHTML = `
+      <div class="stat"><div class="label">Experts</div><div class="value">${totals.experts ?? 0}</div><div class="hint">active profiles</div></div>
+      <div class="stat"><div class="label">Bookings</div><div class="value">${totals.bookings ?? 0}</div><div class="hint">all time</div></div>
+      <div class="stat"><div class="label">Avg rating</div><div class="value">${data.average_rating ?? "—"}</div><div class="hint">${totals.reviews ?? 0} reviews</div></div>
+      <div class="stat"><div class="label">Members</div><div class="value">${totals.users ?? 0}</div><div class="hint">registered users</div></div>`;
+
+    const week = data.bookings_last_7_days || [];
+    const max = Math.max(1, ...week.map(day => day.count));
+    $("#weekChart").innerHTML = week.map(day => `
+      <div class="bar-col" title="${day.date}: ${day.count}">
+        <b>${day.count}</b>
+        <div class="bar" style="height:${Math.max(4, Math.round((day.count / max) * 88))}%"></div>
+        <small>${day.label}</small>
+      </div>`).join("");
+
+    const statusOrder = ["pending", "confirmed", "completed", "cancelled"];
+    const colors = { pending: "#f59e0b", confirmed: "#10b981", completed: "#3b82f6", cancelled: "#ef4444" };
+    const statusCounts = Object.fromEntries((data.bookings_by_status || []).map(row => [row.label, row.count]));
+    const totalBookings = statusOrder.reduce((sum, key) => sum + (statusCounts[key] || 0), 0);
+    let cursor = 0;
+    const segments = statusOrder.map(key => {
+      const count = statusCounts[key] || 0;
+      const start = cursor;
+      cursor += totalBookings ? (count / totalBookings) * 100 : 0;
+      return `${colors[key]} ${start}% ${cursor}%`;
+    });
+    $("#statusDonut").style.background = totalBookings
+      ? `conic-gradient(${segments.join(", ")})`
+      : "conic-gradient(#e2e8f0 0 100%)";
+    $("#donutTotal").textContent = totalBookings;
+    $("#statusLegend").innerHTML = statusOrder.map(key => `
+      <div><span style="background:${colors[key]}"></span>${key} · <b>${statusCounts[key] || 0}</b></div>`).join("");
+
+    $("#topExperts").innerHTML = (data.top_experts || []).length
+      ? data.top_experts.map(expert => `
+          <li><b>${esc(expert.name)}</b><small>${esc(expert.profession)} · ${expert.rating}/5 (${expert.review_count})</small></li>`).join("")
+      : `<li class="typing">No reviews yet.</li>`;
+
+    const categories = (data.experts_by_category || []).filter(row => row.count > 0);
+    const maxCategory = Math.max(1, ...categories.map(row => row.count));
+    $("#categoryBars").innerHTML = categories.length
+      ? categories.map(row => `
+          <div class="hbar"><span>${esc(row.category)}</span><div class="track"><div class="fill" style="width:${Math.round((row.count / maxCategory) * 100)}%"></div></div><b>${row.count}</b></div>`).join("")
+      : `<p class="typing">No experts yet.</p>`;
+  }
+
+  $("#refreshInsights").addEventListener("click", loadAnalytics);
+
+  /* ------------------------------------------------------------------ */
+  /* Assistant                                                           */
+  /* ------------------------------------------------------------------ */
+  function toggleAssistant(force) {
+    const panel = $("#assistantPanel");
+    const shouldOpen = force !== undefined ? force : panel.classList.contains("hidden");
+    panel.classList.toggle("hidden", !shouldOpen);
+    if (shouldOpen) {
+      if (!$("#chat").dataset.started) {
+        $("#chat").dataset.started = "1";
+        addAssistantMessage("bot", "Hi! I'm the GuideMe assistant. Describe what you need and I'll suggest the right expert — no forms needed.");
+        renderAssistantPrompts(EXAMPLES.slice(0, 3));
+      }
+      setTimeout(() => $("#chatInput").focus(), 60);
+    }
+  }
+
+  function addAssistantMessage(role, text) {
+    const node = document.createElement("div");
+    node.className = `msg ${role}`;
+    node.textContent = text;
+    $("#chat").appendChild(node);
+    $("#chat").scrollTop = $("#chat").scrollHeight;
+    return node;
+  }
+
+  function renderAssistantPrompts(prompts) {
+    const wrap = document.createElement("div");
+    wrap.className = "suggestions";
+    prompts.forEach(prompt => {
+      const button = document.createElement("button");
+      button.className = "suggestion";
+      button.type = "button";
+      button.innerHTML = `<span>💡</span><span>${esc(prompt)}</span>`;
+      button.addEventListener("click", () => {
+        $("#chatInput").value = prompt;
+        sendAssistant();
+      });
+      wrap.appendChild(button);
+    });
+    $("#chat").appendChild(wrap);
+    $("#chat").scrollTop = $("#chat").scrollHeight;
+  }
+
+  async function sendAssistant() {
+    const input = $("#chatInput");
+    const message = input.value.trim();
+    if (!message) return;
+    input.value = "";
+    addAssistantMessage("user", message);
+    const typing = addAssistantMessage("bot", "Thinking…");
+    typing.classList.add("typing");
+    try {
+      const data = await api("/api/assistant/", { method: "POST", body: { message } });
+      typing.remove();
+      addAssistantMessage("bot", data.reply);
+      if (data.suggestions && data.suggestions.length) {
+        state.assistantResults = data.suggestions;
+        const wrap = document.createElement("div");
+        wrap.className = "suggestions";
+        data.suggestions.forEach(expert => {
+          const button = document.createElement("button");
+          button.className = "suggestion";
+          button.type = "button";
+          button.innerHTML = `
+            <span class="avatar" style="width:32px;height:32px;border-radius:10px;font-size:0.72rem;background:${gradientFor(expert.name)}">${esc(initials(expert.name))}</span>
+            <span><b>${esc(expert.name)}</b><small>${esc(expert.profession)} · ${expert.rating ? expert.rating + "/5" : "new"}</small></span>
+            <span class="score-badge">${expert.match_score}%</span>`;
+          button.addEventListener("click", () => openBooking(expert));
+          wrap.appendChild(button);
+        });
+        $("#chat").appendChild(wrap);
+      }
+      if (data.follow_up) addAssistantMessage("bot", data.follow_up);
+      if (data.suggested_prompts) renderAssistantPrompts(data.suggested_prompts.slice(0, 2));
+    } catch (error) {
+      typing.remove();
+      addAssistantMessage("bot", `Sorry — ${error.message}`);
+    }
+  }
+
+  $("#assistantFab").addEventListener("click", () => toggleAssistant());
+  $("#assistantClose").addEventListener("click", () => toggleAssistant(false));
+  $("#chatSend").addEventListener("click", sendAssistant);
+  $("#chatInput").addEventListener("keydown", event => {
+    if (event.key === "Enter" && !event.shiftKey) {
+      event.preventDefault();
+      sendAssistant();
+    }
+  });
+
+  /* ------------------------------------------------------------------ */
+  /* Global events                                                       */
+  /* ------------------------------------------------------------------ */
+  let searchTimer;
+  $("#searchInput").addEventListener("input", () => {
+    clearTimeout(searchTimer);
+    searchTimer = setTimeout(loadExperts, 300);
+  });
+  $("#categoryFilter").addEventListener("change", loadExperts);
+  $("#sortSelect").addEventListener("change", loadExperts);
+
+  document.addEventListener("click", event => {
+    const close = event.target.closest("[data-close]");
+    if (close) {
+      closeModal(close.closest(".modal"));
+      return;
+    }
+    if (event.target.classList.contains("modal")) closeModal(event.target);
+  });
+
+  document.addEventListener("keydown", event => {
+    if (event.key === "Escape") {
+      closeModal();
+      toggleAssistant(false);
+    }
+  });
+
+  /* ------------------------------------------------------------------ */
+  /* Boot                                                                */
+  /* ------------------------------------------------------------------ */
+  async function boot() {
+    $("#exampleChips").innerHTML = EXAMPLES.slice(0, 4)
+      .map(text => `<button class="chip" type="button" data-example="${esc(text)}">${esc(text)}</button>`)
+      .join("");
+    renderCategories();
+    renderAuth();
+    renderBookings([]);
+
+    try {
+      const health = await api("/api/health/");
+      $("#aiModeBadge").innerHTML = `<span class="dot"></span> ${health.ai_mode || "API online"}`;
+    } catch (_) {
+      $("#aiModeBadge").innerHTML = `<span class="dot" style="background:#dc2626"></span> offline`;
+    }
+
+    await validateSession();
+    await loadExperts();
+    await Promise.all([loadAnalytics(), state.user ? loadBookings() : Promise.resolve()]);
+  }
+
+  boot();
+})();
+</script>
+</body>
+</html>
